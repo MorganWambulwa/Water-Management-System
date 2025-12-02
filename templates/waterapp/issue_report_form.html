@@ -1,0 +1,44 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px;">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-danger text-white py-3">
+                    <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Report an Issue</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">
+                        Please provide details about the issue. Your report helps us dispatch technicians faster.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Water Source</label>
+                            {{ form.water_source }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Priority Level</label>
+                            {{ form.priority_level }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Description of Problem</label>
+                            {{ form.description }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">Submit Report</button>
+                            <a href="{% url 'index' %}" class="btn btn-light">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

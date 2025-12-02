@@ -1,0 +1,129 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Admin Dashboard</h2>
+        <a href="{% url 'water_source_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add New Source
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Network Status</h5>
+                    <canvas id="statusChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Source Types</h5>
+                    <canvas id="typeChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-danger">High Priority Issues</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Problem</th>
+                                    <th>Reported</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for issue in open_issues %}
+                                <tr>
+                                    <td>{{ issue.water_source.name }}</td>
+                                    <td>{{ issue.description|truncatewords:5 }}</td>
+                                    <td>{{ issue.reported_at|date:"M d, H:i" }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'issue_toggle_resolve' issue.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-check-lg"></i> Resolve
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No open issues!</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Management</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'water_source_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-list-ul me-2"></i> View All Sources
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-people me-2"></i> Manage Technicians
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action text-danger">
+                        <i class="bi bi-download me-2"></i> Export Report (PDF)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ status_counts|json_script:"status-data" }}
+{{ source_type_counts|json_script:"type-data" }}
+<script>
+    // Load JSON data embedded safely using json_script
+    const statusData = JSON.parse(document.getElementById('status-data').textContent || '[]');
+    const typeData = JSON.parse(document.getElementById('type-data').textContent || '[]');
+
+    // Render Status Chart
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: statusData.map(d => d.status),
+            datasets: [{
+                data: statusData.map(d => d.count),
+                backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0dcaf0']
+            }]
+        }
+    });
+
+    // Render Type Chart
+    new Chart(document.getElementById('typeChart'), {
+        type: 'bar',
+        data: {
+            labels: typeData.map(d => d.source_type),
+            datasets: [{
+                label: 'Count',
+                data: typeData.map(d => d.count),
+                backgroundColor: '#0d6efd'
+            }]
+        }
+    });
+</script>
+{% endblock %}

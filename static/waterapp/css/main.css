@@ -1,0 +1,111 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(rgba(0, 50, 120, 0.85), rgba(0, 90, 180, 0.7)), 
+                url('https://images.unsplash.com/photo-1581093588402-48590e8d3568?q=80&w=2000&auto=format&fit=crop'); 
+    background-size: cover;
+    background-position: center;
+    color: white;
+    min-height: 85vh;
+    position: relative;
+    padding-top: 80px;
+}
+
+/* Glassmorphism */
+.glass-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    color: white;
+}
+
+/* Buttons */
+.btn-danger-custom {
+    background-color: #ff4757;
+    border: none;
+    padding: 12px 30px;
+    font-weight: 600;
+    color: white;
+}
+.btn-danger-custom:hover {
+    background-color: #ff2e43;
+    color: white;
+}
+
+.btn-outline-custom {
+    border: 1px solid rgba(255,255,255,0.6);
+    color: white;
+    padding: 12px 30px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.btn-outline-custom:hover {
+    background-color: white;
+    color: #0056b3;
+}
+
+/* Stats Cards */
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: none;
+    transition: transform 0.2s;
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+/* --- Footer Styles (Matches Tailwind Slate-900 Theme) --- */
+.footer-section {
+    background-color: #0f172a; /* Tailwind bg-slate-900 */
+    color: #cbd5e1;            /* Tailwind text-slate-300 */
+    border-top: 1px solid #1e293b; /* Tailwind border-slate-800 */
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    margin-top: 5rem; /* Separation from content */
+}
+
+.footer-brand {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.footer-text {
+    color: #94a3b8; /* Tailwind text-slate-400 */
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.footer-heading {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.footer-link {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.875rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    transition: color 0.2s;
+}
+
+.footer-link:hover {
+    color: #22d3ee; /* Tailwind text-cyan-400 */
+}
+
+.footer-bottom {
+    border-top: 1px solid #1e293b;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    font-size: 0.75rem;
+    color: #64748b; /* Tailwind text-slate-500 */
+}

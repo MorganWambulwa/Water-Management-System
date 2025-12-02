@@ -1,0 +1,79 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px;">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h2 class="fw-bold">{{ source.name }}</h2>
+                        <span class="badge bg-{{ source.status_color }} fs-6 align-self-center">{{ source.get_status_display }}</span>
+                    </div>
+                    {% if source.is_verified %}
+                    <span class="badge bg-primary mb-3"><i class="bi bi-patch-check"></i> Verified Source</span>
+                    {% endif %}
+                    
+                    <p class="text-muted">{{ source.description }}</p>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <strong>Type</strong><br>{{ source.get_source_type_display }}
+                        </div>
+                        <div class="col-4">
+                            <strong>Location</strong><br>{{ source.latitude }}, {{ source.longitude }}
+                        </div>
+                        <div class="col-4">
+                            <strong>Installed</strong><br>{{ source.installation_date }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mt-4">Maintenance History</h4>
+            <div class="list-group shadow-sm">
+                {% for log in repair_history %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1 fw-bold">Repaired by {{ log.technician.username|default:"Technician" }}</h6>
+                        <small class="text-muted">{{ log.repair_date }}</small>
+                    </div>
+                    <p class="mb-1">{{ log.work_done }}</p>
+                    <small class="text-success fw-bold">Cost: ${{ log.cost }}</small>
+                </div>
+                {% empty %}
+                <div class="list-group-item text-center text-muted">No repair history found.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body">
+                    <h5 class="fw-bold">Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'water_source_update' source.pk %}" class="btn btn-outline-secondary">Edit Source Details</a>
+                        <a href="{% url 'repair_log_create' source.pk %}" class="btn btn-primary">Log Maintenance</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0 fw-bold">Active Issues</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for issue in open_issues %}
+                    <li class="list-group-item">
+                        <small class="text-danger fw-bold">Priority: {{ issue.priority_level }}</small><br>
+                        {{ issue.description }}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-success"><i class="bi bi-check-circle"></i> No active issues.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

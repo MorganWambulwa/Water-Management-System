@@ -1,0 +1,56 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px;">
+    <h2 class="fw-bold mb-4">Water Network Analytics</h2>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <h1>{{ total_sources }}</h1>
+                    <small>Total Sources</small>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold">Operational Status Distribution</div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold">Issues by Priority</div>
+                <div class="card-body">
+                    <canvas id="issuesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // You will need to pass 'status_data' and 'issue_data' from your analytics view
+    const ctxStatus = document.getElementById('statusChart');
+    const ctxIssues = document.getElementById('issuesChart');
+    
+    // Placeholder data for visual structure
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: ['Operational', 'Maintenance', 'Broken'],
+            datasets: [{
+                data: [12, 5, 2], // Replace with dynamic Django variables
+                backgroundColor: ['#198754', '#ffc107', '#dc3545']
+            }]
+        }
+    });
+</script>
+{% endblock %}

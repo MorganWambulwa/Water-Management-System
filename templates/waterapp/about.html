@@ -1,0 +1,55 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="bg-primary text-white py-5 mb-5" style="background: linear-gradient(rgba(0, 50, 120, 0.9), rgba(0, 90, 180, 0.8));">
+    <div class="container py-5 text-center">
+        <h1 class="display-4 fw-bold">About AquaConnect</h1>
+        <p class="lead mb-0">Ensuring clean water access through technology and community.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h2 class="fw-bold mb-3">Our Mission</h2>
+            <p class="text-muted lead">
+                AquaConnect is designed to bridge the gap between communities and water service providers. 
+                We believe that access to clean water is a fundamental human right.
+            </p>
+            <p>
+                By leveraging real-time data and community reporting, we reduce downtime for water sources 
+                and ensure transparency in maintenance.
+            </p>
+        </div>
+        <div class="col-lg-6">
+            <div class="p-5 bg-light rounded-3 text-center">
+                <i class="bi bi-droplet-fill text-primary display-1"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row text-center mt-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 p-4">
+                <i class="bi bi-shield-check text-success fs-1 mb-3"></i>
+                <h5>Reliable Data</h5>
+                <p class="text-muted small">Verified sources and real-time status updates.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 p-4">
+                <i class="bi bi-people-fill text-info fs-1 mb-3"></i>
+                <h5>Community Driven</h5>
+                <p class="text-muted small">Empowering residents to report issues instantly.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 p-4">
+                <i class="bi bi-graph-up-arrow text-warning fs-1 mb-3"></i>
+                <h5>Transparent Analytics</h5>
+                <p class="text-muted small">Clear insights for better decision making.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
