@@ -29,21 +29,12 @@ class IssueReportForm(forms.ModelForm):
         fields = ['water_source', 'description', 'priority_level']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe the issue (e.g., No water flow, Broken handle...)'}),
-            # UI Validation: Prevent user from clicking down past 1
-            'priority_level': forms.NumberInput(attrs={'min': '1', 'max': '5'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
-
-    def clean_priority_level(self):
-        """Backend Validation: Ensure priority is positive."""
-        priority = self.cleaned_data.get('priority_level')
-        if priority is not None and priority < 1:
-            raise ValidationError("Priority level must be 1 or higher.")
-        return priority
 
 class RepairLogForm(forms.ModelForm):
     """Form for technicians to log a repair."""
@@ -53,12 +44,7 @@ class RepairLogForm(forms.ModelForm):
         widgets = {
             'work_done': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Details of repair work completed...'}),
             # UI Validation: Prevent negative cost in browser
-            'cost': forms.NumberInput(attrs={'min': '0', 'step': '1.00',}),
-            'class': 'no-spinners',
-                # 1. Block keys: Stop user from typing minus, e, or using arrows
-                'onkeydown': "if(['ArrowUp', 'ArrowDown', '-', 'e'].includes(event.key)) { event.preventDefault(); }",
-                # 2. Block Paste/Input: If a negative value gets in (e.g. paste), remove it immediately
-                'oninput': "validity.valid||(value='');"
+            'cost': forms.NumberInput(attrs={'min': '0', 'step': '1.00', 'class': 'no-spinners'}),
         }
     
     def __init__(self, *args, **kwargs):

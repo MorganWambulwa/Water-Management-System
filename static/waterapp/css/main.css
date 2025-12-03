@@ -109,3 +109,15 @@ body {
     font-size: 0.75rem;
     color: #64748b; /* Tailwind text-slate-500 */
 }
+/* 
+.navbar-transparentz {
+    background: rgba(0,0,0,0.2);
+}
+
+.btn-rounded {
+    border-radius: 20px;
+}
+
+.min-vh-80 {
+    min-height: 80vh;
+} */

@@ -54,6 +54,7 @@
                     <div class="d-grid gap-2">
                         <a href="{% url 'water_source_update' source.pk %}" class="btn btn-outline-secondary">Edit Source Details</a>
                         <a href="{% url 'repair_log_create' source.pk %}" class="btn btn-primary">Log Maintenance</a>
+                        <a href="{% url 'water_source_delete' source.pk %}" class="btn btn-outline-danger">Delete Source</a>
                     </div>
                 </div>
             </div>

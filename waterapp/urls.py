@@ -18,6 +18,7 @@ urlpatterns = [
     path('sources/<int:pk>/', views.water_source_detail, name='water_source_detail'),
     path('sources/add/', views.water_source_create_update, name='water_source_create'),
     path('sources/edit/<int:pk>/', views.water_source_create_update, name='water_source_update'),
+    path('sources/delete/<int:pk>/', views.water_source_delete, name='water_source_delete'),
     
     # --- Issues & Repairs ---
     path('report/new/', views.issue_report_create, name='issue_report_create'),

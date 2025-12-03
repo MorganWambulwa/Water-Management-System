@@ -8,7 +8,12 @@
             <p class="text-muted">Real-time status of community water points.</p>
         </div>
         <div class="col-md-4 text-end">
-            <input type="text" class="form-control" placeholder="Search by name or zone...">
+            <form method="get" action="{% url 'water_source_list' %}">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Search by name or description..." value="{{ request.GET.q }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
         </div>
     </div>
 

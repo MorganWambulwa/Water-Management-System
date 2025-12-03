@@ -7,7 +7,7 @@ from .forms import IssueReportForm, WaterSourceForm, RepairLogForm
 
 def index(request):
     """
-    Landing page: Renders the exact 'AquaConnect' dashboard shown in the screenshot.
+    Landing page: Renders the exact 'WaterConnect' dashboard shown in the screenshot.
     """
     # 1. The 3 main stats cards
     total_sources = WaterSource.objects.count()
@@ -28,17 +28,23 @@ def index(request):
 
 def water_source_list(request):
     """List of all water sources for public viewing."""
-    # Fixed: Changed 'reports' to 'issues' to match related_name in models.py
-    sources = WaterSource.objects.all().annotate(
+    sources = WaterSource.objects.all()
+    query = request.GET.get('q')
+    if query:
+        sources = sources.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        )
+
+    sources = sources.annotate(
         num_open_issues=Count('issues', filter=Q(issues__is_resolved=False))
     )
     return render(request, 'waterapp/water_source_list.html', {'sources': sources})
 
 def water_source_detail(request, pk):
     """Detailed view of a single water source."""
-    source = get_object_or_404(WaterSource, pk=pk)
-    # Fixed: Changed related_name access to match model
-    open_issues = source.issues.filter(is_resolved=False)
+    source = get_object_or_404(WaterSource.objects.prefetch_related('issues', 'repairs'), pk=pk)
+    open_issues = [issue for issue in source.issues.all() if not issue.is_resolved]
     repair_history = source.repairs.all()
     
     context = {
@@ -122,6 +128,15 @@ def water_source_create_update(request, pk=None):
     return render(request, 'waterapp/water_source_form.html', {'form': form, 'source': source})
 
 @login_required
+def water_source_delete(request, pk):
+    """Deletes a water source after confirmation."""
+    source = get_object_or_404(WaterSource, pk=pk)
+    if request.method == 'POST':
+        source.delete()
+        return redirect('water_source_list')
+    return render(request, 'waterapp/water_source_confirm_delete.html', {'source': source})
+
+@login_required
 def repair_log_create(request, source_pk):
     """Allows a technician to log a repair."""
     source = get_object_or_404(WaterSource, pk=source_pk)
@@ -171,8 +186,4 @@ def about(request):
 
 def water_source_map(request):
     """Renders the map page."""
-    return render(request, 'waterapp/water_source_map.html')
-
-def water_source_map(request):
-    """Renders the HTML page that contains the map."""
     return render(request, 'waterapp/water_source_map.html')

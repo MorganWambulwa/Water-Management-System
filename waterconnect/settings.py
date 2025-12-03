@@ -1,5 +1,5 @@
 """
-Django settings for aquaconnect project.
+Django settings for waterconnect project.
 ... (Standard Django comments)
 """
 
@@ -11,12 +11,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- CORE PROJECT CONFIG ---
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1+#8gg=0h2_(8-m2dc8)!+fsbn_1ky1xsawhfj@h9vk##blemn' # Replace this with a secure key in production
+# Default settings are for development.
+# In production, these should be overridden in a local_settings.py file
+# or with environment variables.
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# It's recommended to generate a new key for production.
+SECRET_KEY = 'a-default-secret-key-that-is-not-secure'
 
+# By default, DEBUG is off.
+DEBUG = False
+
+# In production, set this to the domain name of your site.
 ALLOWED_HOSTS = []
 
 # --- APPLICATION DEFINITION ---
@@ -42,7 +47,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'aquaconnect.urls'
+ROOT_URLCONF = 'waterconnect.urls'
 
 TEMPLATES = [
     {
@@ -62,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'aquaconnect.wsgi.application'
+WSGI_APPLICATION = 'waterconnect.wsgi.application'
 
 # --- DATABASE, PASSWORDS, I18N ---
 # ... (No changes in these sections)
@@ -98,10 +103,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-email-password'
+EMAIL_HOST_USER = '' # Set in local_settings.py or environment variables
+EMAIL_HOST_PASSWORD = '' # Set in local_settings.py or environment variables
 
-# aquaconnect/settings.py
+# waterconnect/settings.py
 
 LANGUAGE_CODE = 'en-us'
 
@@ -109,3 +114,11 @@ TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 USE_TZ = True
+
+# --- LOCAL SETTINGS ---
+# The local_settings.py file is not tracked in git and is used to override
+# settings for the local development environment.
+try:
+    from .local_settings import *
+except ImportError:
+    pass
