@@ -1,0 +1,17 @@
+.timezonewarning {
+    display: none !important;
+}
+
+.field-password #id_password p:first-of-type {
+    display: none;
+}
+
+.field-password .help {
+    display: none !important;
+}
+
+.field-password #id_password p:last-of-type {
+    display: block;
+    margin-top: 0;
+    margin-bottom: 0;
+}
