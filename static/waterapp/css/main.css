@@ -3,7 +3,6 @@ body {
     background-color: #f8f9fa;
 }
 
-/* Hero Section */
 .hero-section {
     background: linear-gradient(rgba(0, 50, 120, 0.85), rgba(0, 90, 180, 0.7)), 
                 url('https://images.unsplash.com/photo-1581093588402-48590e8d3568?q=80&w=2000&auto=format&fit=crop'); 
@@ -15,7 +14,6 @@ body {
     padding-top: 80px;
 }
 
-/* Glassmorphism */
 .glass-card {
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
@@ -24,7 +22,6 @@ body {
     color: white;
 }
 
-/* Buttons */
 .btn-danger-custom {
     background-color: #ff4757;
     border: none;
@@ -49,7 +46,6 @@ body {
     color: #0056b3;
 }
 
-/* Stats Cards */
 .stats-card {
     background: white;
     border-radius: 12px;
@@ -61,14 +57,14 @@ body {
     transform: translateY(-5px);
 }
 
-/* --- Footer Styles (Matches Tailwind Slate-900 Theme) --- */
+
 .footer-section {
-    background-color: #0f172a; /* Tailwind bg-slate-900 */
-    color: #cbd5e1;            /* Tailwind text-slate-300 */
-    border-top: 1px solid #1e293b; /* Tailwind border-slate-800 */
+    background-color: #0f172a;
+    color: #cbd5e1;
+    border-top: 1px solid #1e293b;
     padding-top: 3rem;
     padding-bottom: 3rem;
-    margin-top: 5rem; /* Separation from content */
+    margin-top: 5rem;
 }
 
 .footer-brand {
@@ -78,7 +74,7 @@ body {
 }
 
 .footer-text {
-    color: #94a3b8; /* Tailwind text-slate-400 */
+    color: #94a3b8;
     font-size: 0.875rem;
     line-height: 1.6;
 }
@@ -99,7 +95,7 @@ body {
 }
 
 .footer-link:hover {
-    color: #22d3ee; /* Tailwind text-cyan-400 */
+    color: #22d3ee;
 }
 
 .footer-bottom {
@@ -107,7 +103,7 @@ body {
     margin-top: 3rem;
     padding-top: 2rem;
     font-size: 0.75rem;
-    color: #64748b; /* Tailwind text-slate-500 */
+    color: #64748b;
 }
 /* 
 .navbar-transparentz {

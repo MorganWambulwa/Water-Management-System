@@ -10,5 +10,5 @@ def update_source_status(sender, instance, created, **kwargs):
     """
     if created and instance.priority_level == 3:
         source = instance.water_source
-        source.status = 'M' # Maintenance
+        source.status = 'M'
         source.save()

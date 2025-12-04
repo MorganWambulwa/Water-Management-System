@@ -4,10 +4,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
 <style>
-    /* Make map take up full height minus navbar */
     #map { height: calc(100vh - 76px); width: 100%; margin-top: 76px; }
     
-    /* Custom Popup Style */
     .leaflet-popup-content-wrapper { border-radius: 10px; }
     .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color: white; font-weight: bold; }
 </style>
@@ -17,26 +15,21 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
-    // 1. Initialize Map (Default center: Nairobi. You can change these coords)
     var map = L.map('map').setView([-1.2921, 36.8219], 13);
 
-    // 2. Add OpenStreetMap Tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // 3. Fetch Data from our Django API
     fetch("{% url 'water_source_map_data' %}")
         .then(response => response.json())
         .then(data => {
             data.forEach(source => {
-                // Determine color based on status
                 var color = 'green';
                 if(source.status === 'Maintenance') color = 'orange';
                 if(source.status === 'Broken/Non-Operational') color = 'red';
                 
-                // Create a simple circle marker
                 var marker = L.circleMarker([source.lat, source.lon], {
                     color: color,
                     fillColor: color,
@@ -44,7 +37,6 @@
                     radius: 10
                 }).addTo(map);
 
-                // Add Popup
                 marker.bindPopup(`
                     <div class="text-center">
                         <h6 class="fw-bold mb-1">${source.name}</h6>

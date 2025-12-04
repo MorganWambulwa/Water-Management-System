@@ -97,11 +97,9 @@
 {{ status_counts|json_script:"status-data" }}
 {{ source_type_counts|json_script:"type-data" }}
 <script>
-    // Load JSON data embedded safely using json_script
     const statusData = JSON.parse(document.getElementById('status-data').textContent || '[]');
     const typeData = JSON.parse(document.getElementById('type-data').textContent || '[]');
 
-    // Render Status Chart
     new Chart(document.getElementById('statusChart'), {
         type: 'doughnut',
         data: {
@@ -113,7 +111,6 @@
         }
     });
 
-    // Render Type Chart
     new Chart(document.getElementById('typeChart'), {
         type: 'bar',
         data: {

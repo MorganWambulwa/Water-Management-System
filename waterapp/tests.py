@@ -13,4 +13,4 @@ class WaterSourceModelTest(TestCase):
     def test_water_source_creation(self):
         source = WaterSource.objects.get(name="Test Pump")
         self.assertEqual(source.source_type, "P")
-        self.assertEqual(source.status, "O") # Check default is Operational
+        self.assertEqual(source.status, "O") 

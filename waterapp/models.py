@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
-from django.core.validators import MinValueValidator  # 1. Import Validator
-from decimal import Decimal  # 2. Import Decimal for currency accuracy
+from django.core.validators import MinValueValidator
+from decimal import Decimal
 
 class WaterSource(models.Model):
     """Represents a physical water source."""
@@ -24,7 +24,6 @@ class WaterSource(models.Model):
     name = models.CharField(max_length=100, help_text="E.g., Nairobi Zone A")
     source_type = models.CharField(max_length=1, choices=SOURCE_TYPES)
     
-    # We do NOT add validators here because Lat/Lon can naturally be negative
     latitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Latitude coordinate")
     longitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Longitude coordinate")
     
@@ -56,7 +55,6 @@ class IssueReport(models.Model):
     
     is_resolved = models.BooleanField(default=False)
     
-    # UPDATED: Added validator to prevent priority < 1
     priority_level = models.IntegerField(
         default=1, 
         choices=[(1, 'Low'), (2, 'Medium'), (3, 'High')],
@@ -76,7 +74,6 @@ class RepairLog(models.Model):
     repair_date = models.DateField(default=timezone.now)
     work_done = models.TextField()
     
-    # UPDATED: Added validator to prevent negative costs
     cost = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 

@@ -37,17 +37,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // You will need to pass 'status_data' and 'issue_data' from your analytics view
     const ctxStatus = document.getElementById('statusChart');
     const ctxIssues = document.getElementById('issuesChart');
     
-    // Placeholder data for visual structure
     new Chart(ctxStatus, {
         type: 'doughnut',
         data: {
             labels: ['Operational', 'Maintenance', 'Broken'],
             datasets: [{
-                data: [12, 5, 2], // Replace with dynamic Django variables
+                data: [12, 5, 2],
                 backgroundColor: ['#198754', '#ffc107', '#dc3545']
             }]
         }

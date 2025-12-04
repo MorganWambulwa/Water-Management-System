@@ -82,31 +82,25 @@ DATABASES = {
 
 LOGIN_REDIRECT_URL = 'dashboard' 
 
-# ADDITION 2: Sets the page users go to after logging out (Index view)
 LOGOUT_REDIRECT_URL = 'index'
 
-# --- STATIC FILES ---
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# --- DEFAULT PRIMARY KEY ---
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- EMAIL CONFIG (FIXED/UPDATED) ---
 
-# FIX/UPDATE: The backend path for email was incorrect. Changed it to standard Django path.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '' # Set in local_settings.py or environment variables
-EMAIL_HOST_PASSWORD = '' # Set in local_settings.py or environment variables
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 
-# waterconnect/settings.py
 
 LANGUAGE_CODE = 'en-us'
 
@@ -115,9 +109,6 @@ TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
-# --- LOCAL SETTINGS ---
-# The local_settings.py file is not tracked in git and is used to override
-# settings for the local development environment.
 try:
     from .local_settings import *
 except ImportError:
