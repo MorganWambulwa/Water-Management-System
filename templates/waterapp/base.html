@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'waterapp/css/main.css' %}">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><path fill=%22%230dcaf0%22 d=%22M7.21.8C7.69.295 8 0 8 0c.109.363.234.7.405 1.02.482.908 1.163 1.884 1.72 2.757 1.154 1.81 2.97 4.692 2.97 7.252 0 2.793-2.32 5.06-5.18 5.06-2.86 0-5.18-2.267-5.18-5.06 0-2.56 1.815-5.442 2.97-7.252.556-.872 1.238-1.849 1.72-2.757.171-.32.296-.657.405-1.02.09-.3.303-.593.303-.593z%22/></svg>">
 </head>
 <body>
 
@@ -79,6 +81,19 @@
     {% include 'waterapp/footer.html' %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'waterapp/js/forms.js' %}"></script>
+        <script src="{% static 'waterapp/js/forms.js' %}"></script>
+        
+        <script>
+            (function() {
+                window.addEventListener('online', () => {
+                    console.log("Network connection restored. Auto-reloading...");
+                    window.location.reload();
+                });
+
+                window.addEventListener('offline', () => {
+                    console.warn("Network connection lost. Some features may not work.");
+                });
+            })();
+        </script>
 </body>
 </html>

@@ -5,7 +5,7 @@ body {
 
 .hero-section {
     background: linear-gradient(rgba(0, 50, 120, 0.85), rgba(0, 90, 180, 0.7)), 
-                url('https://images.unsplash.com/photo-1581093588402-48590e8d3568?q=80&w=2000&auto=format&fit=crop'); 
+                 url('https://images.unsplash.com/photo-1581093588402-48590e8d3568?q=80&w=2000&auto=format&fit=crop'); 
     background-size: cover;
     background-position: center;
     color: white;
@@ -105,8 +105,61 @@ body {
     font-size: 0.75rem;
     color: #64748b;
 }
-/* 
-.navbar-transparentz {
+
+/* --- MOBILE NAVBAR FIXES (For screens < 992px) --- */
+/* --- MOBILE NAVBAR FIXES (For screens < 992px) --- */
+@media (max-width: 991px) {
+    /* 1. Hide the standard Bootstrap hamburger icon (we use the full width menu) */
+    .navbar-toggler {
+        display: none !important;
+    }
+
+    /* 2. Force the menu to drop down as an overlay, not pushing content */
+    .navbar-collapse {
+        background-color: #0f172a; /* Dark Slate Blue, matches navbar */
+        padding: 1rem;
+        border-radius: 0 0 10px 10px;
+        border-top: 1px solid #1e293b;
+        
+        /* CRITICAL: Make it an overlay to solve vertical space issue */
+        position: absolute; 
+        top: 100%; /* Drops exactly below the fixed navbar */
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+        /* Enable horizontal scrolling for the links */
+        display: flex !important;
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+        padding-bottom: 10px; 
+    }
+    
+    /* Hide scrollbar visually */
+    .navbar-collapse::-webkit-scrollbar {
+        display: none; 
+    }
+    
+    /* 3. Force the list items into a single, scrollable row */
+    .navbar-nav {
+        flex-direction: row !important;
+        align-items: center;
+        gap: 15px; 
+        padding-left: 10px;
+        padding-right: 20px;
+        white-space: nowrap; /* Prevents text from wrapping */
+    }
+
+    /* 4. Adjust Buttons for mobile row */
+    .navbar-nav .btn {
+        margin-top: 0 !important; 
+        padding: 6px 15px !important;
+        font-size: 0.85rem;
+        flex-shrink: 0; /* Ensures buttons don't get squished */
+    }
+}
+/* .navbar-transparentz {
     background: rgba(0,0,0,0.2);
 }
 

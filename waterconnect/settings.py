@@ -4,7 +4,7 @@ Django settings for waterconnect project.
 
 from pathlib import Path
 import os
-import dj_database_url
+import dj_database_url # type: ignore
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
