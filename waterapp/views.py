@@ -4,8 +4,10 @@ from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import WaterSource, IssueReport, RepairLog
-from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm
+from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm, VerificationRequestForm, ContactForm
 
 
 def index(request):
@@ -168,6 +170,58 @@ def water_source_delete(request, pk):
     return render(request, 'waterapp/water_source_confirm_delete.html', {'source': source})
 
 @login_required
+def request_verification(request, pk):
+    """Allows the creator to request verification via email."""
+    source = get_object_or_404(WaterSource, pk=pk)
+    
+    if source.created_by != request.user:
+        messages.error(request, "You can only verify sources you created.")
+        return redirect('water_source_detail', pk=pk)
+    
+    if source.is_verified:
+        messages.info(request, "This source is already verified!")
+        return redirect('water_source_detail', pk=pk)
+
+    if request.method == 'POST':
+        form = VerificationRequestForm(request.POST)
+        if form.is_valid():
+            subject = f"Verification Request: {source.name}"
+            email_body = f"""
+            Hello Admin,
+
+            A user has requested verification for a water source.
+
+            --- DETAILS ---
+            Source Name: {source.name}
+            Source ID: {source.id}
+            Submitted By: {request.user.username} ({request.user.email})
+            
+            --- USER MESSAGE ---
+            {form.cleaned_data['message']}
+            
+            --- ACTION ---
+            Review this source in the admin panel:
+            https://water-management-system-ouep.onrender.com/admin/waterapp/watersource/{source.pk}/change/
+            """
+            try:
+                send_mail(
+                    subject,
+                    email_body,
+                    settings.EMAIL_HOST_USER,
+                    [settings.EMAIL_HOST_USER],
+                    fail_silently=False,
+                )
+                messages.success(request, "Verification request sent successfully!")
+            except Exception as e:
+                messages.error(request, f"Failed to send email. Error: {str(e)}")
+                
+            return redirect('water_source_detail', pk=pk)
+    else:
+        form = VerificationRequestForm(initial={'subject': f"Verify: {source.name}"})
+
+    return render(request, 'waterapp/verification_request.html', {'form': form, 'source': source})
+
+@login_required
 def repair_log_create(request, source_pk):
     """Allows a technician to log a repair."""
     source = get_object_or_404(WaterSource, pk=source_pk)
@@ -196,6 +250,39 @@ def issue_toggle_resolve(request, pk):
         issue.is_resolved = not issue.is_resolved
         issue.save()
     return redirect('dashboard')
+
+def contact(request):
+    """Renders the Contact page and handles message submission."""
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            subject = f"Contact Form: {form.cleaned_data['subject']}"
+            message = f"""
+            You have received a new message from the WaterConnect website.
+            
+            Name: {form.cleaned_data['name']}
+            Email: {form.cleaned_data['email']}
+            
+            Message:
+            {form.cleaned_data['message']}
+            """
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [settings.EMAIL_HOST_USER],
+                    fail_silently=False,
+                )
+                messages.success(request, "Thank you! Your message has been sent.")
+                return redirect('contact')
+            except Exception as e:
+                messages.error(request, "Failed to send message. Please try again later.")
+    else:
+        form = ContactForm()
+
+    return render(request, 'waterapp/contact.html', {'form': form})
 
 
 def legal_page(request, page_type):

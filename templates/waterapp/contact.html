@@ -1,0 +1,80 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container" style="padding-top: 120px; padding-bottom: 80px;">
+    <div class="row g-5">
+        <div class="col-lg-5">
+            <h1 class="fw-bold mb-4">Get in Touch</h1>
+            <p class="lead text-muted mb-5">
+                Have questions about WaterConnect? We are here to help. Send us a message and we'll respond as soon as possible.
+            </p>
+
+            <div class="d-flex mb-4">
+                <div class="flex-shrink-0 btn-square bg-primary bg-opacity-10 text-primary rounded p-3 me-3">
+                    <i class="bi bi-geo-alt fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Headquarters</h5>
+                    <p class="text-muted mb-0">Nairobi, Kenya</p>
+                </div>
+            </div>
+
+            <!-- <div class="d-flex mb-4">
+                <div class="flex-shrink-0 btn-square bg-primary bg-opacity-10 text-primary rounded p-3 me-3">
+                    <i class="bi bi-envelope fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Email Us</h5>
+                    <p class="text-muted mb-0">support@waterconnect.org</p>
+                </div>
+            </div> -->
+
+            <div class="d-flex">
+                <div class="flex-shrink-0 btn-square bg-primary bg-opacity-10 text-primary rounded p-3 me-3">
+                    <i class="bi bi-telephone fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Call Us</h5>
+                    <p class="text-muted mb-0">+254 700 000 000</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="fw-bold mb-4">Send a Message</h3>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Your Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email Address</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Subject</label>
+                                {{ form.subject }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Message</label>
+                                {{ form.message }}
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">
+                                    Send Message <i class="bi bi-send ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

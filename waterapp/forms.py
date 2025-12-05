@@ -5,10 +5,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 class WaterSourceForm(forms.ModelForm):
-    """Form for administrators to create/edit a WaterSource."""
+    """Form for users to create/edit a WaterSource."""
     class Meta:
         model = WaterSource
-        fields = ['name', 'source_type', 'latitude', 'longitude', 'status', 'is_verified', 'description']
+        fields = ['name', 'source_type', 'latitude', 'longitude', 'status', 'description']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
@@ -17,8 +17,6 @@ class WaterSourceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control', 'placeholder': field.title()})
-            if field == 'is_verified':
-                self.fields[field].widget.attrs.update({'class': 'form-check-input'})
 
 class IssueReportForm(forms.ModelForm):
     """Form for residents to report an issue."""
@@ -80,6 +78,32 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+            
+class VerificationRequestForm(forms.Form):
+    """Form for users to request verification of their source."""
+    subject = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    
+    message = forms.CharField(widget=forms.Textarea(attrs={
+        'rows': 4, 
+        'placeholder': 'Please provide details proving this source is legitimate (e.g. "I am the facility manager", "Located at main gate")...'
+    }))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+
+class ContactForm(forms.Form):
+    """General contact form for users/guests."""
+    name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Your Name'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Your Email Address'}))
+    subject = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Subject'}))
+    message = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'placeholder': 'How can we help you?'}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
