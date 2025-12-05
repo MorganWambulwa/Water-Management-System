@@ -1,30 +1,14 @@
 """
 Django settings for waterconnect project.
-... (Standard Django comments)
 """
 
 from pathlib import Path
 import os
+import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- CORE PROJECT CONFIG ---
-
-# Default settings are for development.
-# In production, these should be overridden in a local_settings.py file
-# or with environment variables.
-
-# It's recommended to generate a new key for production.
-SECRET_KEY = 'a-default-secret-key-that-is-not-secure'
-
-# By default, DEBUG is off.
-DEBUG = False
-
-# In production, set this to the domain name of your site.
-ALLOWED_HOSTS = []
-
-# --- APPLICATION DEFINITION ---
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-change-me')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,8 +21,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # ... (No changes here, standard middleware)
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -52,8 +36,6 @@ ROOT_URLCONF = 'waterconnect.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # FIX/UPDATE: Using os.path.join is necessary when working with pathlib (Path) for DIRS path definition outside the project.
-        # This ensures the 'templates' folder at the root level (WATER_PROJECT/templates) is found.
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -69,47 +51,58 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'waterconnect.wsgi.application'
 
-# --- DATABASE, PASSWORDS, I18N ---
-# ... (No changes in these sections)
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', 
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
+        conn_max_age=600
+    )
 }
 
-
-LOGIN_REDIRECT_URL = 'dashboard' 
-
+LOGIN_REDIRECT_URL = 'index' 
 LOGOUT_REDIRECT_URL = 'index'
 
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'Africa/Nairobi'
+USE_I18N = True
+USE_TZ = True
+
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = '' 
 
 
-LANGUAGE_CODE = 'en-us'
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
-TIME_ZONE = 'Africa/Nairobi'
-
-USE_I18N = True
-USE_TZ = True
-
-try:
-    from .local_settings import *
-except ImportError:
-    pass
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME]
+    DEBUG = False
+else:
+    ALLOWED_HOSTS = []
+    DEBUG = True
