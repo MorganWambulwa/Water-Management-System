@@ -10,8 +10,13 @@
                         <h2 class="fw-bold">{{ source.name }}</h2>
                         <span class="badge bg-{{ source.status_color }} fs-6 align-self-center">{{ source.get_status_display }}</span>
                     </div>
+                    
                     {% if source.is_verified %}
                     <span class="badge bg-primary mb-3"><i class="bi bi-patch-check"></i> Verified Source</span>
+                    {% endif %}
+                    
+                    {% if source.created_by %}
+                    <p class="text-muted small mb-2">Registered by: {{ source.created_by.username }}</p>
                     {% endif %}
                     
                     <p class="text-muted">{{ source.description }}</p>
@@ -52,9 +57,20 @@
                 <div class="card-body">
                     <h5 class="fw-bold">Actions</h5>
                     <div class="d-grid gap-2">
-                        <a href="{% url 'water_source_update' source.pk %}" class="btn btn-outline-secondary">Edit Source Details</a>
-                        <a href="{% url 'repair_log_create' source.pk %}" class="btn btn-primary">Log Maintenance</a>
-                        <a href="{% url 'water_source_delete' source.pk %}" class="btn btn-outline-danger">Delete Source</a>
+                        
+                        {% if user == source.created_by or user.is_superuser %}
+                            <a href="{% url 'water_source_update' source.pk %}" class="btn btn-outline-secondary">Edit Source Details</a>
+                            <a href="{% url 'water_source_delete' source.pk %}" class="btn btn-outline-danger">Delete Source</a>
+                        {% endif %}
+
+                        {% if user.is_staff %}
+                            <a href="{% url 'repair_log_create' source.pk %}" class="btn btn-primary">Log Maintenance</a>
+                        {% endif %}
+
+                        <a href="{% url 'issue_report_create' %}" class="btn btn-danger text-white">
+                            <i class="bi bi-exclamation-triangle"></i> Report Problem
+                        </a>
+
                     </div>
                 </div>
             </div>

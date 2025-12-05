@@ -30,6 +30,10 @@ class WaterSource(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='O')
     is_verified = models.BooleanField(default=False, help_text="Has this source been verified for water quality?")
     
+    # --- NEW FIELD: Tracks who created this source ---
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_sources')
+    # -----------------------------------------------
+
     installation_date = models.DateField(default=timezone.now)
     description = models.TextField(blank=True)
     last_updated = models.DateTimeField(auto_now=True)
