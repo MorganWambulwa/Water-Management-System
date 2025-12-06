@@ -123,3 +123,4 @@ watchdog==6.0.0
 websockets==15.0.1
 whitenoise==6.11.0
 zipp==3.23.0
+django-jazzmin==3.0.1
