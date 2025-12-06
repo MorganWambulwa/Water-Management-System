@@ -7,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import WaterSource, IssueReport, RepairLog
+from django.http import HttpResponse
 from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm, VerificationRequestForm, ContactForm
 
 
@@ -250,6 +251,34 @@ def issue_toggle_resolve(request, pk):
         issue.is_resolved = not issue.is_resolved
         issue.save()
     return redirect('dashboard')
+
+@login_required
+def export_issues_csv(request):
+    """Exports all open issues to a CSV file."""
+    if not request.user.is_staff:
+        raise PermissionDenied("You do not have permission to access this page.")
+        
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="open_issues_report.csv"'
+
+    import csv
+    writer = csv.writer(response)
+
+    writer.writerow(['ID', 'Source', 'Priority', 'Description', 'Reported At'])
+
+
+    issues = IssueReport.objects.filter(is_resolved=False).select_related('water_source')
+    
+    for issue in issues:
+        writer.writerow([
+            issue.pk,
+            issue.water_source.name,
+            issue.priority_level,
+            issue.description,
+            issue.reported_at.strftime("%Y-%m-%d %H:%M")
+        ])
+
+    return response
 
 def contact(request):
     """Renders the Contact page and handles message submission."""

@@ -23,4 +23,5 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('legal/<str:page_type>/', views.legal_page, name='legal_page'),
     path('contact/', views.contact, name='contact'),
+    path('admin/export/issues/', views.export_issues_csv, name='export_issues_csv'),
 ]

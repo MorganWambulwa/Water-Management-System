@@ -81,11 +81,11 @@
                     <a href="{% url 'water_source_list' %}" class="list-group-item list-group-item-action">
                         <i class="bi bi-list-ul me-2"></i> View All Sources
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action">
+                    <a href="/admin/auth/user/" class="list-group-item list-group-item-action">
                         <i class="bi bi-people me-2"></i> Manage Technicians
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action text-danger">
-                        <i class="bi bi-download me-2"></i> Export Report (PDF)
+                    <a href="{% url 'export_issues_csv' %}" class="list-group-item list-group-item-action text-danger">
+                        <i class="bi bi-download me-2"></i> Export Open Issues (CSV)
                     </a>
                 </div>
             </div>
