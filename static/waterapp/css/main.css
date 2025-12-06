@@ -1,7 +1,13 @@
-body {
+html, body {
     font-family: 'Poppins', sans-serif;
     background-color: #f8f9fa;
+    overflow-x: hidden;
+    max-width: 100%;
+    scroll-behavior: smooth;
+    margin: 0;
+    padding: 0;
 }
+
 
 .hero-section {
     background: linear-gradient(rgba(0, 50, 120, 0.85), rgba(0, 90, 180, 0.7)), 
@@ -106,67 +112,56 @@ body {
     color: #64748b;
 }
 
-/* --- MOBILE NAVBAR FIXES (For screens < 992px) --- */
-/* --- MOBILE NAVBAR FIXES (For screens < 992px) --- */
 @media (max-width: 991px) {
-    /* 1. Hide the standard Bootstrap hamburger icon (we use the full width menu) */
-    .navbar-toggler {
-        display: none !important;
-    }
-
-    /* 2. Force the menu to drop down as an overlay, not pushing content */
     .navbar-collapse {
-        background-color: #0f172a; /* Dark Slate Blue, matches navbar */
-        padding: 1rem;
-        border-radius: 0 0 10px 10px;
-        border-top: 1px solid #1e293b;
+        background-color: #0f172a; 
+        padding: 1rem 0;
         
-        /* CRITICAL: Make it an overlay to solve vertical space issue */
-        position: absolute; 
-        top: 100%; /* Drops exactly below the fixed navbar */
+        display: block !important; 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch;
+        
+        position: absolute;
+        top: 100%;
         left: 0;
         right: 0;
         z-index: 1000;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
 
-        /* Enable horizontal scrolling for the links */
-        display: flex !important;
-        overflow-x: auto; 
-        -webkit-overflow-scrolling: touch; 
-        padding-bottom: 10px; 
-    }
     
-    /* Hide scrollbar visually */
-    .navbar-collapse::-webkit-scrollbar {
-        display: none; 
-    }
-    
-    /* 3. Force the list items into a single, scrollable row */
     .navbar-nav {
         flex-direction: row !important;
+        flex-wrap: nowrap;
         align-items: center;
-        gap: 15px; 
-        padding-left: 10px;
-        padding-right: 20px;
-        white-space: nowrap; /* Prevents text from wrapping */
+        padding: 0 15px;
     }
-
-    /* 4. Adjust Buttons for mobile row */
+    
+    .navbar-nav .nav-item {
+        margin: 0 10px;
+        white-space: nowrap;
+        gap: 5px;
+        padding: 0;
+    }
+    
     .navbar-nav .btn {
         margin-top: 0 !important; 
-        padding: 6px 15px !important;
-        font-size: 0.85rem;
-        flex-shrink: 0; /* Ensures buttons don't get squished */
+        padding: 6px 12px !important;
+        font-size: 0.8rem;
+    }
+
+    .navbar-collapse::-webkit-scrollbar {
+        display: none;
+         
+    }
+
+    .hero-section .d-flex {
+        gap: 10px !important; 
+    }
+
+    .btn-danger-custom, .btn-outline-custom {
+        padding: 10px 15px !important;
+        font-size: 0.9rem !important; 
+        height: auto;
     }
 }
-/* .navbar-transparentz {
-    background: rgba(0,0,0,0.2);
-}
-
-.btn-rounded {
-    border-radius: 20px;
-}
-
-.min-vh-80 {
-    min-height: 80vh;
-} */
