@@ -28,7 +28,6 @@ class RepairLogAdmin(admin.ModelAdmin):
             'all': ('waterapp/css/admin_custom.css',)
         }
 
-
 admin.site.unregister(User)
 
 @admin.register(User)
@@ -37,6 +36,9 @@ class CustomUserAdmin(UserAdmin):
         css = {
             'all': ('waterapp/css/admin_custom.css',)
         }
+        js = (
+            'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap',
+        )
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)

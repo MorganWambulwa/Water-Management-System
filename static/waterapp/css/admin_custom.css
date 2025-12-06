@@ -1,13 +1,41 @@
+body, h1, h2, h3, h4, th, td, input, a, .module h2 {
+    font-family: 'Poppins', sans-serif !important;
+}
+#content {
+    background: #f8f9fa;
+}
+
+#header {
+    background: #0f172a !important;
+    border-bottom: 2px solid #005ab4; 
+}
+#site-name a {
+    color: white !important;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border-bottom: 1px solid #005ab4;
+}
+
+a:link, a:visited {
+    color: #007bff;
+}
+a:hover {
+    color: #22d3ee;
+}
+
 .timezonewarning {
     display: none !important;
 }
 
-.field-password #id_password p:first-of-type {
-    display: none;
+.field-password .help { 
+    display: none !important; 
 }
 
-.field-password .help {
-    display: none !important;
+.field-password #id_password p:first-of-type {
+    display: none;
 }
 
 .field-password #id_password p:last-of-type {
