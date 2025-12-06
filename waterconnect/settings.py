@@ -4,7 +4,7 @@ Django settings for waterconnect project.
 
 from pathlib import Path
 import os
-import dj_database_url # type: ignore
+import dj_database_url  # type: ignore
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -12,13 +12,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-change-me
 
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'waterapp', 
+    'waterapp',
 ]
 
 MIDDLEWARE = [
@@ -78,6 +79,46 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# JAZZMIN_SETTINGS = {
+    # "site_title": "WaterConnect",
+    # "site_header": "WaterConnect", 
+    # "site_brand": "WaterConnect Administration",
+    # "welcome_sign": "Welcome to the Water System Administration",
+    # "site_logo": "waterapp/images/favicon.png",
+    # "login_logo": None,
+
+    # "order_with_respect_to": ["waterapp", "auth"], 
+    # "copyright": "WaterApp © 2025", 
+    # "custom_css": "waterapp/css/admin_custom.css",
+    # "search_model": "waterapp.WaterSource",
+    # "show_ui_builder": False,
+    # "hide_apps": ['auth'],
+    # "user_avatar": None,
+    # "show_sidebar": True,
+# }
+
+# JAZZMIN_UI_TWEAKS = {
+#     "theme": "darkly",
+#     "dark_mode_theme": "darkly", 
+#     "accent": "accent-primary",
+#     "navbar_fixed": True,
+#     "sidebar_fixed": True,
+#     "sidebar": "sidebar-dark-primary",
+#     "navbar": "navbar-dark",
+#     "sidebar_nav_flat_style": True, 
+#     "button_classes": {
+#         "primary": "btn-primary",
+#         "secondary": "btn-outline-secondary",
+#     },
+#     "actions_sticky": True,
+    
+#     # Text sizing flags set to False ensures default readable font size
+#     "navbar_small_text": False,
+#     "footer_small_text": False,
+#     "body_small_text": False,
+# }
+
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Africa/Nairobi'
