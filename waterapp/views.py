@@ -1,13 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
-from django.http import JsonResponse
+# ADDED HttpResponse here
+from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import WaterSource, IssueReport, RepairLog
-from django.http import HttpResponse
 from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm, VerificationRequestForm, ContactForm
 
 
@@ -107,6 +107,9 @@ def issue_report_create(request):
 @login_required
 def dashboard(request):
     """Internal dashboard for admins/technicians."""
+    if not request.user.is_staff:
+         raise PermissionDenied("You do not have permission to access the dashboard.")
+
     sources = WaterSource.objects.all().order_by('name')
     open_issues = IssueReport.objects.filter(is_resolved=False).order_by('-priority_level', '-reported_at')
     
@@ -266,7 +269,6 @@ def export_issues_csv(request):
 
     writer.writerow(['ID', 'Source', 'Priority', 'Description', 'Reported At'])
 
-
     issues = IssueReport.objects.filter(is_resolved=False).select_related('water_source')
     
     for issue in issues:
@@ -319,8 +321,7 @@ def legal_page(request, page_type):
     content = {
         'privacy': {
             'title': 'Privacy Policy', 'updated': 'Last Updated: December 2025',
-            'body': """<p>At WaterConnect, we are committed to protecting your personal information...</p>
-                       <h5 class='mt-4 fw-bold'>1. Information We Collect</h5><ul><li>Personal Data...</li></ul>"""
+            'body': """<p>At WaterConnect, we are committed to protecting your personal information...</p>"""
         },
         'terms': {
             'title': 'Terms of Service', 'updated': 'Last Updated: December 2025',

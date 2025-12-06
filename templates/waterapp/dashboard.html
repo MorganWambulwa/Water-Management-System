@@ -100,14 +100,34 @@
     const statusData = JSON.parse(document.getElementById('status-data').textContent || '[]');
     const typeData = JSON.parse(document.getElementById('type-data').textContent || '[]');
 
+    const statusColors = {
+        'O': '#198754', 
+        'M': '#ffc107', 
+        'C': '#dc3545', 
+        'B': '#8B4513'  
+    };
+
+    const statusLabels = {
+        'O': 'Operational',
+        'M': 'Maintenance',
+        'C': 'Contaminated',
+        'B': 'Broken'
+    };
+
     new Chart(document.getElementById('statusChart'), {
         type: 'doughnut',
         data: {
-            labels: statusData.map(d => d.status),
+            labels: statusData.map(d => statusLabels[d.status] || d.status),
             datasets: [{
                 data: statusData.map(d => d.count),
-                backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0dcaf0']
+                backgroundColor: statusData.map(d => statusColors[d.status] || '#6c757d'),
+                borderWidth: 0
             }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'top' }
+            }
         }
     });
 
@@ -120,6 +140,12 @@
                 data: typeData.map(d => d.count),
                 backgroundColor: '#0d6efd'
             }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            },
+            plugins: { legend: { display: false } }
         }
     });
 </script>

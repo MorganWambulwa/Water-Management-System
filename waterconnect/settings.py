@@ -80,23 +80,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# JAZZMIN_SETTINGS = {
-    # "site_title": "WaterConnect",
-    # "site_header": "WaterConnect", 
+JAZZMIN_SETTINGS = {
+    "site_url": "/",
     # "site_brand": "WaterConnect Administration",
-    # "welcome_sign": "Welcome to the Water System Administration",
     # "site_logo": "waterapp/images/favicon.png",
-    # "login_logo": None,
+    # "site_title": "WaterConnect",
+    # "site_header": "WaterConnect",
+    # "site_logo": "waterapp/images/favicon.png",
+    "login_logo": None,
+    "welcome_sign": "Welcome to the Water System Administration",
 
-    # "order_with_respect_to": ["waterapp", "auth"], 
-    # "copyright": "WaterApp © 2025", 
-    # "custom_css": "waterapp/css/admin_custom.css",
-    # "search_model": "waterapp.WaterSource",
-    # "show_ui_builder": False,
-    # "hide_apps": ['auth'],
-    # "user_avatar": None,
-    # "show_sidebar": True,
-# }
+    "order_with_respect_to": ["waterapp", "auth"], 
+    # "copyright": "WaterConnect © 2025", 
+    "custom_css": "waterapp/css/admin_custom.css",
+    "search_model": "waterapp.WaterSource",
+    "show_ui_builder": False,
+    "show_version": False,
+    "hide_apps": [],
+    "user_avatar": None,
+    "show_sidebar": True,
+}
 
 # JAZZMIN_UI_TWEAKS = {
 #     "theme": "darkly",

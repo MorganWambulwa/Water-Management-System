@@ -6,33 +6,32 @@ from decimal import Decimal
 
 class WaterSource(models.Model):
     """Represents a physical water source."""
+
     SOURCE_TYPES = [
-        ('B', 'Borehole'),
-        ('W', 'Well'),
-        ('T', 'Tap'),
-        ('R', 'River Intake'),
-        ('P', 'Public Pump'),
+        ('BH', 'Borehole'),
+        ('WL', 'Well'),
+        ('TP', 'Tap'),
+        ('RI', 'River Intake'),
+        ('PP', 'Public Pump'),
     ]
     
     STATUS_CHOICES = [
-        ('O', 'Operational'),
+        ('O', 'Operational'), 
         ('M', 'Maintenance'),
         ('B', 'Broken/Non-Operational'),
-        ('C', 'Contaminated'),
+        ('C', 'Contaminated'),  
     ]
 
     name = models.CharField(max_length=100, help_text="E.g., Nairobi Zone A")
-    source_type = models.CharField(max_length=1, choices=SOURCE_TYPES)
+    source_type = models.CharField(max_length=2, choices=SOURCE_TYPES)
     
     latitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Latitude coordinate")
     longitude = models.DecimalField(max_digits=9, decimal_places=6, help_text="Longitude coordinate")
     
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='O')
+    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default='O')
     is_verified = models.BooleanField(default=False, help_text="Has this source been verified for water quality?")
     
-    # --- NEW FIELD: Tracks who created this source ---
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_sources')
-    # -----------------------------------------------
 
     installation_date = models.DateField(default=timezone.now)
     description = models.TextField(blank=True)
@@ -45,10 +44,14 @@ class WaterSource(models.Model):
     def status_color(self):
         """Helper to return the CSS color class based on status."""
         if self.status == 'O':
-            return 'success' # Green
+            return 'success'       # Green
         elif self.status == 'M':
-            return 'warning' # Yellow/Orange
-        return 'danger' # Red
+            return 'warning'       # Yellow
+        elif self.status == 'C':
+            return 'danger'        # Red (Contaminated)
+        elif self.status == 'B':
+            return 'brown-custom'  # Brown (Broken) - Requires custom CSS
+        return 'secondary'
 
 class IssueReport(models.Model):
     """Report submitted by a resident about a water source issue."""
