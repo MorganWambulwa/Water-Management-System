@@ -99,6 +99,7 @@ JAZZMIN_SETTINGS = {
     "hide_apps": [],
     "user_avatar": None,
     "show_sidebar": True,
+    "actions_sticky": False,
 }
 
 # JAZZMIN_UI_TWEAKS = {

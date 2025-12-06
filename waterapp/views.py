@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
-# ADDED HttpResponse here
 from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
@@ -9,7 +8,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import WaterSource, IssueReport, RepairLog
 from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm, VerificationRequestForm, ContactForm
-
+import csv 
 
 def index(request):
     """Landing page: Renders the public dashboard."""
@@ -106,25 +105,48 @@ def issue_report_create(request):
 
 @login_required
 def dashboard(request):
-    """Internal dashboard for admins/technicians."""
-    if not request.user.is_staff:
-         raise PermissionDenied("You do not have permission to access the dashboard.")
+    """
+    Renders different dashboards based on user role.
+    """
+    
+    # --- LOGIC FOR ADMINS ---
+    if request.user.is_staff:
+        sources = WaterSource.objects.all().order_by('name')
+        open_issues = IssueReport.objects.filter(is_resolved=False).order_by('-priority_level', '-reported_at')
+        
+        status_counts = WaterSource.objects.values('status').annotate(count=Count('status'))
+        source_type_counts = WaterSource.objects.values('source_type').annotate(count=Count('source_type'))
+        
+        context = {
+            'sources': sources,
+            'open_issues': open_issues,
+            'status_counts': list(status_counts),
+            'source_type_counts': list(source_type_counts),
+            'total_sources': sources.count(),
+            'total_open_issues': open_issues.count(),
+        }
+        return render(request, 'waterapp/dashboard.html', context)
+    
+    # --- LOGIC FOR NORMAL USERS ---
+    else:
+        # 1. My Reported Issues
+        user_issues = IssueReport.objects.filter(reporter=request.user).order_by('-reported_at')
+        
+        # 2. Notifications (FIXED: Changed 'last_updated' to 'reported_at')
+        resolved_notifications = IssueReport.objects.filter(
+            reporter=request.user, 
+            is_resolved=True
+        ).order_by('-reported_at')[:3]
 
-    sources = WaterSource.objects.all().order_by('name')
-    open_issues = IssueReport.objects.filter(is_resolved=False).order_by('-priority_level', '-reported_at')
-    
-    status_counts = WaterSource.objects.values('status').annotate(count=Count('status'))
-    source_type_counts = WaterSource.objects.values('source_type').annotate(count=Count('source_type'))
-    
-    context = {
-        'sources': sources,
-        'open_issues': open_issues,
-        'status_counts': list(status_counts),
-        'source_type_counts': list(source_type_counts),
-        'total_sources': sources.count(),
-        'total_open_issues': open_issues.count(),
-    }
-    return render(request, 'waterapp/dashboard.html', context)
+        # 3. Available Sources (WaterSource has 'last_updated', so this is fine)
+        available_sources = WaterSource.objects.filter(status='O').order_by('-last_updated')[:3]
+        
+        context = {
+            'user_issues': user_issues,
+            'resolved_notifications': resolved_notifications,
+            'available_sources': available_sources,
+        }
+        return render(request, 'waterapp/user_dashboard.html', context)
 
 @login_required
 def profile(request):
@@ -264,7 +286,6 @@ def export_issues_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="open_issues_report.csv"'
 
-    import csv
     writer = csv.writer(response)
 
     writer.writerow(['ID', 'Source', 'Priority', 'Description', 'Reported At'])

@@ -1,0 +1,105 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px;">
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Welcome, {{ user.first_name|default:user.username }}!</h2>
+            <p class="text-muted">Track your reports and find clean water.</p>
+        </div>
+    </div>
+
+    {% if resolved_notifications %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+                <div class="card-body">
+                    <h5 class="card-title text-success fw-bold"><i class="bi bi-bell-fill"></i> Good News!</h5>
+                    <ul class="list-unstyled mb-0">
+                        {% for note in resolved_notifications %}
+                        <li class="mb-1">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            The issue you reported at <strong>{{ note.water_source.name }}</strong> has been fixed!
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">My Reported Issues</h5>
+                    <a href="{% url 'issue_report_create' %}" class="btn btn-sm btn-primary">+ Report New</a>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for issue in user_issues %}
+                    <div class="list-group-item p-3">
+                        <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0 fw-bold">{{ issue.water_source.name }}</h6>
+                            {% if issue.is_resolved %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </div>
+                        <p class="mb-1 text-muted small">{{ issue.description }}</p>
+                        <small class="text-muted">Reported on: {{ issue.reported_at|date:"M d, Y" }}</small>
+                    </div>
+                    {% empty %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-clipboard-check fs-1 d-block mb-3 opacity-50"></i>
+                        <p>You haven't reported any issues yet.</p>
+                        <a href="{% url 'issue_report_create' %}" class="btn btn-outline-primary btn-sm">Report a Problem</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-droplet-fill"></i> Available Sources</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for source in available_sources %}
+                    <a href="{% url 'water_source_detail' source.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ source.name }}</strong>
+                            <div class="small text-muted">{{ source.get_source_type_display }}</div>
+                        </div>
+                        <span class="badge bg-success rounded-pill">Active</span>
+                    </a>
+                    {% empty %}
+                    <div class="p-3 text-muted small text-center">No active sources found.</div>
+                    {% endfor %}
+                    <div class="card-footer bg-white text-center">
+                        <a href="{% url 'water_source_list' %}" class="text-decoration-none small fw-bold">View Full Map &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm text-center p-4">
+                <div class="mb-3">
+                    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <span class="fs-1 fw-bold text-primary">{{ user.username|slice:":1"|upper }}</span>
+                    </div>
+                </div>
+                <h4 class="fw-bold">{{ user.first_name }} {{ user.last_name }}</h4>
+                <p class="text-muted">@{{ user.username }}</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'profile' %}" class="btn btn-outline-secondary btn-sm">Edit Profile Settings</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

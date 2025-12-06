@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 class WaterSourceForm(forms.ModelForm):
-    """Form for users to create/edit a WaterSource."""
+    """Form for users to create/edit a WaterSource (No verification access)."""
     class Meta:
         model = WaterSource
         fields = ['name', 'source_type', 'latitude', 'longitude', 'status', 'description']
@@ -17,6 +17,16 @@ class WaterSourceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control', 'placeholder': field.title()})
+
+class AdminWaterSourceForm(WaterSourceForm):
+    """Special form for Admins that allows verifying sources."""
+    class Meta(WaterSourceForm.Meta):
+        fields = ['name', 'source_type', 'latitude', 'longitude', 'status', 'is_verified', 'description']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'is_verified' in self.fields:
+            self.fields['is_verified'].widget.attrs.update({'class': 'form-check-input'})
 
 class IssueReportForm(forms.ModelForm):
     """Form for residents to report an issue."""

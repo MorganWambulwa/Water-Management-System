@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.urls import path
 from .models import WaterSource, IssueReport, RepairLog
-from .forms import RepairLogForm, WaterSourceForm, IssueReportForm, AdminRepairLogForm
+from .forms import RepairLogForm, WaterSourceForm, IssueReportForm, AdminRepairLogForm, AdminWaterSourceForm
 from . import views 
 
 original_get_urls = admin.site.get_urls
@@ -22,7 +22,7 @@ admin.site.get_urls = get_admin_urls
 
 @admin.register(WaterSource)
 class WaterSourceAdmin(admin.ModelAdmin):
-    form = WaterSourceForm
+    form = AdminWaterSourceForm
     list_display = ('name', 'source_type', 'status', 'is_verified', 'last_updated')
     list_filter = ('status', 'source_type', 'is_verified')
     search_fields = ('name', 'description')
