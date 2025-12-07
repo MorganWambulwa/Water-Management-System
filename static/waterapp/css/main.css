@@ -114,8 +114,8 @@ html, body {
 
 @media (max-width: 991px) {
     .hero-section {
-        padding-top: 60px;
-        min-height: 70vh; 
+        padding-top: 150px;
+        min-height: auto; 
     }
 
     .navbar-collapse {
