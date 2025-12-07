@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .email-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .brand-strip {
+            background-color: #054bfb;
+            height: 6px;
+            width: 100%;
+        }
+
+        .content-padding {
+            padding: 30px;
+        }
+
+        .data-row {
+            margin-bottom: 8px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 5px;
+        }
+
+        a { color: #43B02A; text-decoration: none; font-weight: 500; }
+        a:hover { text-decoration: underline; }
+        
+
+        .message-content {
+            margin-top: 25px;
+            margin-bottom: 30px;
+            min-height: 80px;
+            white-space: pre-line; 
+            color: #222;
+        }
+
+        .signature {
+            margin-top: 40px;
+            color: #777;
+            font-size: 13px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-wrapper">
+        <div class="brand-strip"></div>
+        
+        <div class="content-padding">
+            <div class="data-row">
+                <span class="label">From:</span> {{ name }} (<a href="mailto:{{ email }}">{{ email }}</a>)
+            </div>
+
+            <div class="data-row">
+                <span class="label">Subject:</span> <strong>{{ subject }}</strong>
+            </div>
+
+            <div class="message-content">{{ message }}</div>
+
+            <div class="signature">
+                <div class="logo-text">
+                    <span style="color: #43B02A;">💧</span> WaterConnect
+                </div>
+                <br>
+                <a href="https://water-management-system-ouep.onrender.com">www.waterconnect.org</a>
+
+                <div class="footer-address">
+                    &copy; 2025 WaterConnect | Nairobi, Kenya
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

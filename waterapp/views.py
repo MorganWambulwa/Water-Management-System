@@ -8,7 +8,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import WaterSource, IssueReport, RepairLog
 from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm, VerificationRequestForm, ContactForm
-import csv # Imported for the export function
+import csv 
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 def index(request):
     """Landing page: Renders the public dashboard."""
@@ -107,11 +109,8 @@ def issue_report_create(request):
 def dashboard(request):
     """
     Renders different dashboards based on user role.
-    - Staff/Admin: Sees Analytics & Management.
-    - Regular User: Sees their personal activity and available sources.
     """
     
-    # --- LOGIC FOR ADMINS (Existing Code) ---
     if request.user.is_staff:
         sources = WaterSource.objects.all().order_by('name')
         open_issues = IssueReport.objects.filter(is_resolved=False).order_by('-priority_level', '-reported_at')
@@ -129,18 +128,12 @@ def dashboard(request):
         }
         return render(request, 'waterapp/dashboard.html', context)
     
-    # --- LOGIC FOR NORMAL USERS (New Code) ---
     else:
-        # 1. My Reported Issues
         user_issues = IssueReport.objects.filter(reporter=request.user).order_by('-reported_at')
-        
-        # 2. Notifications: Issues reported by me that are now RESOLVED
         resolved_notifications = IssueReport.objects.filter(
             reporter=request.user, 
             is_resolved=True
         ).order_by('-last_updated')[:3]
-
-        # 3. Available Sources (Simulating "Sources Near Me" - showing top Operational ones)
         available_sources = WaterSource.objects.filter(status='O').order_by('-last_updated')[:3]
         
         context = {
@@ -306,41 +299,42 @@ def export_issues_csv(request):
     return response
 
 def contact(request):
-    """Renders the Contact page and handles message submission."""
+    """Renders the Contact page and handles HTML email submission."""
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            subject = f"Contact Form: {form.cleaned_data['subject']}"
-            message = f"""
-            You have received a new message from the WaterConnect website.
+            context = {
+                'name': form.cleaned_data['name'],
+                'email': form.cleaned_data['email'],
+                'subject': form.cleaned_data['subject'],
+                'message': form.cleaned_data['message']
+            }
             
-            Name: {form.cleaned_data['name']}
-            Email: {form.cleaned_data['email']}
+            html_message = render_to_string('waterapp/contact_email.html', context)
+            plain_message = strip_tags(html_message)
             
-            Message:
-            {form.cleaned_data['message']}
-            """
+            subject = f"New Contact: {form.cleaned_data['subject']}"
             
             try:
                 send_mail(
                     subject,
-                    message,
+                    plain_message,
                     settings.EMAIL_HOST_USER,
                     [settings.EMAIL_HOST_USER],
+                    html_message=html_message,
                     fail_silently=False,
                 )
-                messages.success(request, "Thank you! Your message has been sent.")
+                messages.success(request, "Your message has been sent.")
                 return redirect('contact')
             except Exception as e:
-                messages.error(request, "Failed to send message. Please try again later.")
+                messages.error(request, "Failed to send message. Please try again.")
     else:
         form = ContactForm()
 
     return render(request, 'waterapp/contact.html', {'form': form})
 
-
 def legal_page(request, page_type):
-    """Renders the Privacy, Terms, and Cookie policies."""
+    """Renders the Privacy, Terms and Cookie policies."""
     content = {
         'privacy': {
             'title': 'Privacy Policy', 'updated': 'Last Updated: December 2025',
