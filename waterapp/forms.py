@@ -73,10 +73,18 @@ class SignUpForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].help_text = ''
         
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
+        self.fields['username'].help_text = ''
+
+        if 'password' in self.fields:
+            self.fields['password'].help_text = '' 
+        
+        if 'val_1' in self.fields:
+             self.fields['val_1'].help_text = ''
+             
+        for field_name in self.fields:
+            self.fields[field_name].help_text = ''
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})
             
 class AdminRepairLogForm(RepairLogForm):
     """Special form for Admin panel that includes ALL fields."""

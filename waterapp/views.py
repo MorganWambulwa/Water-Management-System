@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import WaterSource, IssueReport, RepairLog
 from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm, VerificationRequestForm, ContactForm
-import csv 
+import csv # Imported for the export function
 
 def index(request):
     """Landing page: Renders the public dashboard."""
@@ -107,9 +107,11 @@ def issue_report_create(request):
 def dashboard(request):
     """
     Renders different dashboards based on user role.
+    - Staff/Admin: Sees Analytics & Management.
+    - Regular User: Sees their personal activity and available sources.
     """
     
-    # --- LOGIC FOR ADMINS ---
+    # --- LOGIC FOR ADMINS (Existing Code) ---
     if request.user.is_staff:
         sources = WaterSource.objects.all().order_by('name')
         open_issues = IssueReport.objects.filter(is_resolved=False).order_by('-priority_level', '-reported_at')
@@ -127,18 +129,18 @@ def dashboard(request):
         }
         return render(request, 'waterapp/dashboard.html', context)
     
-    # --- LOGIC FOR NORMAL USERS ---
+    # --- LOGIC FOR NORMAL USERS (New Code) ---
     else:
         # 1. My Reported Issues
         user_issues = IssueReport.objects.filter(reporter=request.user).order_by('-reported_at')
         
-        # 2. Notifications (FIXED: Changed 'last_updated' to 'reported_at')
+        # 2. Notifications: Issues reported by me that are now RESOLVED
         resolved_notifications = IssueReport.objects.filter(
             reporter=request.user, 
             is_resolved=True
-        ).order_by('-reported_at')[:3]
+        ).order_by('-last_updated')[:3]
 
-        # 3. Available Sources (WaterSource has 'last_updated', so this is fine)
+        # 3. Available Sources (Simulating "Sources Near Me" - showing top Operational ones)
         available_sources = WaterSource.objects.filter(status='O').order_by('-last_updated')[:3]
         
         context = {

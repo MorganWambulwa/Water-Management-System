@@ -11,7 +11,7 @@ html, body {
 
 .hero-section {
     background: linear-gradient(rgba(0, 50, 120, 0.85), rgba(0, 90, 180, 0.7)), 
-                 url('https://images.unsplash.com/photo-1581093588402-48590e8d3568?q=80&w=2000&auto=format&fit=crop'); 
+                 url('https://images.pexels.com/photos/40784/drops-of-water-water-nature-liquid-40784.jpeg'); 
     background-size: cover;
     background-position: center;
     color: white;
@@ -113,9 +113,14 @@ html, body {
 }
 
 @media (max-width: 991px) {
+    .hero-section {
+        padding-top: 60px;
+        min-height: 70vh; 
+    }
+
     .navbar-collapse {
         background-color: #0f172a; 
-        padding: 1rem 0;
+        padding: 0.5rem 0; 
         
         display: block !important; 
         overflow-x: auto; 
@@ -128,17 +133,16 @@ html, body {
         z-index: 1000;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-
     
     .navbar-nav {
         flex-direction: row !important;
         flex-wrap: nowrap;
         align-items: center;
-        padding: 0 15px;
+        padding: 0 10px;
     }
     
     .navbar-nav .nav-item {
-        margin: 0 10px;
+        margin: 0 8px;
         white-space: nowrap;
         gap: 5px;
         padding: 0;
@@ -146,22 +150,46 @@ html, body {
     
     .navbar-nav .btn {
         margin-top: 0 !important; 
-        padding: 6px 12px !important;
-        font-size: 0.8rem;
+        padding: 5px 12px !important;
+        font-size: 0.75rem;
     }
 
     .navbar-collapse::-webkit-scrollbar {
-        display: none;
-         
+        display: none; 
     }
 
     .hero-section .d-flex {
-        gap: 10px !important; 
+        gap: 8px !important; 
     }
 
     .btn-danger-custom, .btn-outline-custom {
-        padding: 10px 15px !important;
-        font-size: 0.9rem !important; 
+        padding: 8px 16px !important; 
+        font-size: 0.85rem !important;
         height: auto;
     }
+}
+
+.bg-brown-custom {
+    background-color: #8B4513 !important;
+    color: white !important;
+}
+
+.status-scroll-box {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.bg-success {
+    --bs-bg-opacity: 1;
+    background-color: rgb(6, 246, 135) !important;
+    color: #000 !important;
+}
+
+.text-success {
+    color: rgb(6, 246, 135) !important;
+}
+
+.help-block,
+.timezonewarning {
+    display: none !important;
 }
