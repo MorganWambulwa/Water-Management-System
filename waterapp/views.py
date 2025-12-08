@@ -334,20 +334,74 @@ def contact(request):
     return render(request, 'waterapp/contact.html', {'form': form})
 
 def legal_page(request, page_type):
-    """Renders the Privacy, Terms and Cookie policies."""
+    """Renders the Privacy, Terms, and Cookie policies with detailed content."""
+    
     content = {
         'privacy': {
-            'title': 'Privacy Policy', 'updated': 'Last Updated: December 2025',
-            'body': """<p>At WaterConnect, we are committed to protecting your personal information...</p>"""
+            'title': 'Privacy Policy',
+            'updated': 'Last Updated: December 2025',
+            'body': """
+                <p>At WaterConnect, we are committed to protecting your personal information and your right to privacy. This policy explains what information we collect and how we use it.</p>
+                
+                <h5 class="mt-4 fw-bold">1. Information We Collect</h5>
+                <p>We collect personal information that you voluntarily provide to us when you register on the website, express an interest in obtaining information about us or our products and services or otherwise when you contact us.</p>
+                <ul>
+                    <li><strong>Personal Data:</strong> Username, email address and phone number (if provided).</li>
+                    <li><strong>Usage Data:</strong> Information about how you interact with our platform, such as the water sources you view or report.</li>
+                    <li><strong>Location Data:</strong> When you use our map features, we may request access to your location to show nearby water sources.</li>
+                </ul>
+
+                <h5 class="mt-4 fw-bold">2. How We Use Your Information</h5>
+                <p>We use the information we collect or receive:</p>
+                <ul>
+                    <li>To facilitate account creation and logon processes.</li>
+                    <li>To send administrative information to you (e.g., updates on reported issues).</li>
+                    <li>To protect our Services (e.g., fraud monitoring and prevention).</li>
+                </ul>
+
+                <h5 class="mt-4 fw-bold">3. Sharing Your Information</h5>
+                <p>We do not share, sell, rent or trade your information with third parties for their promotional purposes. We may share data with local water authorities solely for the purpose of resolving maintenance issues you have reported.</p>
+            """
         },
         'terms': {
-            'title': 'Terms of Service', 'updated': 'Last Updated: December 2025',
-            'body': """<p>Welcome to WaterConnect...</p>"""
+            'title': 'Terms of Service',
+            'updated': 'Last Updated: December 2025',
+            'body': """
+                <p>Welcome to WaterConnect. By accessing our website, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our platform.</p>
+
+                <h5 class="mt-4 fw-bold">1. Use of the Platform</h5>
+                <p>You agree to use WaterConnect only for lawful purposes. You are prohibited from:</p>
+                <ul>
+                    <li>Submitting false or misleading reports about water sources.</li>
+                    <li>Attempting to interfere with the proper working of the site (e.g., hacking or spamming).</li>
+                    <li>Using the contact information of technicians for harassment or non-official purposes.</li>
+                </ul>
+
+                <h5 class="mt-4 fw-bold">2. User Accounts</h5>
+                <p>You are responsible for maintaining the confidentiality of your account and password. You agree to accept responsibility for all activities that occur under your account.</p>
+            """
         },
         'cookies': {
-            'title': 'Cookie Policy', 'updated': 'Last Updated: December 2025',
-            'body': """<p>This Cookie Policy explains how WaterConnect uses cookies...</p>"""
+            'title': 'Cookie Policy',
+            'updated': 'Last Updated: December 2025',
+            'body': """
+                <p>This Cookie Policy explains how WaterConnect uses cookies and similar technologies to recognize you when you visit our website.</p>
+
+                <h5 class="mt-4 fw-bold">1. What are Cookies?</h5>
+                <p>Cookies are small data files that are placed on your computer or mobile device when you visit a website. They are widely used to make websites work more efficiently and to provide reporting information.</p>
+
+                <h5 class="mt-4 fw-bold">2. How We Use Cookies</h5>
+                <ul>
+                    <li><strong>Essential Cookies:</strong> These are strictly necessary for the website to function (e.g., allowing you to log in and access secure areas).</li>
+                    <li><strong>Functionality Cookies:</strong> These are used to recognize you when you return to our website, enabling us to personalize content for you.</li>
+                    <li><strong>Analytics Cookies:</strong> We use these to collect information about how visitors use our website, helping us improve the user experience.</li>
+                </ul>
+
+                <h5 class="mt-4 fw-bold">3. Managing Cookies</h5>
+                <p>You have the right to decide whether to accept or reject cookies. You can set or amend your web browser controls to accept or refuse cookies. If you choose to reject cookies, you may still use our website, though your access to some functionality may be restricted.</p>
+            """
         }
     }
+    
     data = content.get(page_type)
     return render(request, 'waterapp/legal_page.html', {'data': data})
