@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import mpesa_views
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -24,4 +25,5 @@ urlpatterns = [
     path('legal/<str:page_type>/', views.legal_page, name='legal_page'),
     path('contact/', views.contact, name='contact'),
     path('admin/export/issues/', views.export_issues_csv, name='export_issues_csv'),
+    path('donate/', mpesa_views.mpesa_pay, name='mpesa_pay'),
 ]

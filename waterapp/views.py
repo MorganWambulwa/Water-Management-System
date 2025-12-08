@@ -133,7 +133,7 @@ def dashboard(request):
         resolved_notifications = IssueReport.objects.filter(
             reporter=request.user, 
             is_resolved=True
-        ).order_by('-last_updated')[:3]
+        ).order_by('-reported_at')[:3]
         available_sources = WaterSource.objects.filter(status='O').order_by('-last_updated')[:3]
         
         context = {
