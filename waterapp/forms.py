@@ -42,6 +42,20 @@ class IssueReportForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
 
+# --- NEW: Admin Issue Report Form (Enables 'is_resolved') ---
+class AdminIssueReportForm(IssueReportForm):
+    """Special form for Admins to mark issues as resolved."""
+    class Meta(IssueReportForm.Meta):
+        model = IssueReport
+        # Includes 'is_resolved' field for Admins
+        fields = ['water_source', 'description', 'priority_level', 'is_resolved']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'is_resolved' in self.fields:
+            self.fields['is_resolved'].widget.attrs.update({'class': 'form-check-input'})
+# -------------------------------------------------------------
+
 class RepairLogForm(forms.ModelForm):
     """Form for technicians to log a repair."""
     class Meta:
@@ -75,8 +89,25 @@ class SignUpForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields['username'].help_text = ''
         
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
+        # Clean password help text
+        if 'password' in self.fields:
+             self.fields['password'].help_text = '' 
+        if 'val_1' in self.fields:
+             self.fields['val_1'].help_text = ''
+             
+        for field_name in self.fields:
+            self.fields[field_name].help_text = ''
+            self.fields[field_name].widget.attrs.update({'class': 'form-control'})
+            
+            # Autocomplete attributes for accessibility
+            if field_name == 'username':
+                self.fields[field_name].widget.attrs['autocomplete'] = 'username'
+            elif field_name == 'email':
+                self.fields[field_name].widget.attrs['autocomplete'] = 'email'
+            elif field_name == 'first_name':
+                self.fields[field_name].widget.attrs['autocomplete'] = 'given-name'
+            elif field_name == 'last_name':
+                self.fields[field_name].widget.attrs['autocomplete'] = 'family-name'
             
 class AdminRepairLogForm(RepairLogForm):
     """Special form for Admin panel that includes ALL fields."""
@@ -94,6 +125,13 @@ class ProfileUpdateForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
             
+            if field == 'first_name':
+                self.fields[field].widget.attrs['autocomplete'] = 'given-name'
+            elif field == 'last_name':
+                self.fields[field].widget.attrs['autocomplete'] = 'family-name'
+            elif field == 'email':
+                self.fields[field].widget.attrs['autocomplete'] = 'email'
+            
 class VerificationRequestForm(forms.Form):
     """Form for users to request verification of their source."""
     subject = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'readonly': 'readonly'}))
@@ -110,8 +148,14 @@ class VerificationRequestForm(forms.Form):
 
 class ContactForm(forms.Form):
     """General contact form for users/guests."""
-    name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Your Name'}))
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Your Email Address'}))
+    name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+        'placeholder': 'Your Name',
+        'autocomplete': 'name'
+    }))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={
+        'placeholder': 'Your Email Address',
+        'autocomplete': 'email'
+    }))
     subject = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Subject'}))
     message = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'placeholder': 'Type your message here...'}))
 

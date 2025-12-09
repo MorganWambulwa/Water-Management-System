@@ -3,7 +3,14 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.urls import path
 from .models import WaterSource, IssueReport, RepairLog
-from .forms import RepairLogForm, WaterSourceForm, IssueReportForm, AdminRepairLogForm, AdminWaterSourceForm
+from .forms import (
+    RepairLogForm, 
+    WaterSourceForm, 
+    IssueReportForm, 
+    AdminRepairLogForm, 
+    AdminWaterSourceForm, 
+    AdminIssueReportForm
+)
 from . import views 
 
 original_get_urls = admin.site.get_urls
@@ -30,9 +37,11 @@ class WaterSourceAdmin(admin.ModelAdmin):
 
 @admin.register(IssueReport)
 class IssueReportAdmin(admin.ModelAdmin):
-    form = IssueReportForm
+    form = AdminIssueReportForm
+    
     list_display = ('water_source', 'priority_level', 'is_resolved', 'reported_at')
     list_filter = ('is_resolved', 'priority_level')
+    search_fields = ('water_source__name', 'description')
 
 
 @admin.register(RepairLog)
@@ -44,7 +53,6 @@ class RepairLogAdmin(admin.ModelAdmin):
         css = {
             'all': ('waterapp/css/admin_custom.css',)
         }
-
 
 admin.site.unregister(User)
 
