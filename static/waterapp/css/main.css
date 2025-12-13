@@ -120,46 +120,47 @@ html, body {
     .hero-section .container {
         padding-top: 0 !important;
     }
-    
+
     .hero-section {
         padding-top: 150px !important; 
         min-height: auto; 
     }
 
-    .navbar-collapse {
-        background-color: #0f172a; 
-        padding: 0.5rem 0; 
-        
-        display: block !important; 
-        overflow-x: auto; 
-        -webkit-overflow-scrolling: touch;
-        
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    
+
     .navbar-nav {
-        flex-direction: row !important;
-        flex-wrap: nowrap;
-        align-items: center;
+        flex-direction: column !important;
+
+        align-items: flex-end !important;
+
         padding: 0 10px;
+
+        padding-right: 15px; 
+
+        background-color: #0f172a;
+
+        width: 100%;
+
+        border-radius: 0 0 10px 10px;
+
     }
+
     
+
     .navbar-nav .nav-item {
         margin: 0 8px;
         white-space: nowrap;
         gap: 5px;
-        padding: 0;
+
+        padding: 0; 
+
     }
-    
+
     .navbar-nav .btn {
         margin-top: 0 !important; 
         padding: 5px 12px !important;
-        font-size: 0.75rem;
+
+        font-size: 0.75rem; 
+
     }
 
     .navbar-collapse::-webkit-scrollbar {
@@ -167,7 +168,9 @@ html, body {
     }
 
     .hero-section .d-flex {
-        gap: 8px !important; 
+
+        gap: 8px !important;
+
     }
 
     .btn-danger-custom, .btn-outline-custom {
