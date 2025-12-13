@@ -8,7 +8,6 @@ html, body {
     padding: 0;
 }
 
-
 .hero-section {
     background: linear-gradient(rgba(0, 50, 120, 0.85), rgba(0, 90, 180, 0.7)), 
                  url('https://images.pexels.com/photos/40784/drops-of-water-water-nature-liquid-40784.jpeg'); 
@@ -62,7 +61,6 @@ html, body {
 .stats-card:hover {
     transform: translateY(-5px);
 }
-
 
 .footer-section {
     background-color: #0f172a;
@@ -119,6 +117,8 @@ html, body {
 
     .hero-section .container {
         padding-top: 0 !important;
+        position: relative;
+        z-index: 2; 
     }
 
     .hero-section {
@@ -126,41 +126,37 @@ html, body {
         min-height: auto; 
     }
 
-
     .navbar-nav {
         flex-direction: column !important;
-
         align-items: flex-end !important;
-
         padding: 0 10px;
-
         padding-right: 15px; 
-
         background-color: #0f172a;
-
         width: 100%;
-
         border-radius: 0 0 10px 10px;
-
+        margin-top: 20px !important; 
     }
 
-    
+    .navbar-nav .nav-link {
+        position: relative !important;
+        z-index: 1060 !important;
+        padding: 12px 0 !important;
+        display: block !important;
+    }
 
     .navbar-nav .nav-item {
         margin: 0 8px;
         white-space: nowrap;
         gap: 5px;
-
         padding: 0; 
-
     }
 
     .navbar-nav .btn {
         margin-top: 0 !important; 
         padding: 5px 12px !important;
-
         font-size: 0.75rem; 
-
+        position: relative !important;
+        z-index: 1060 !important;
     }
 
     .navbar-collapse::-webkit-scrollbar {
@@ -168,15 +164,17 @@ html, body {
     }
 
     .hero-section .d-flex {
-
         gap: 8px !important;
-
     }
 
     .btn-danger-custom, .btn-outline-custom {
-        padding: 8px 16px !important; 
+        padding: 12px 25px !important; 
         font-size: 0.85rem !important;
         height: auto;
+        position: relative !important;
+        z-index: 1050 !important;
+        cursor: pointer !important;
+        min-height: 44px !important;
     }
 }
 
