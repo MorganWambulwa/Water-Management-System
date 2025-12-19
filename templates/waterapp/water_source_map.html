@@ -8,9 +8,27 @@
     
     .leaflet-popup-content-wrapper { border-radius: 10px; }
     .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color: white; font-weight: bold; }
+    
+    .map-legend {
+        position: absolute;
+        top: 90px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        font-size: 0.85rem;
+    }
 </style>
 
 <div id="map"></div>
+
+<div class="map-legend">
+    <div class="mb-1"><span style="color:green">●</span> Operational Source</div>
+    <div class="mb-1"><span style="color:red">●</span> Broken Source</div>
+    <div><span style="color:#0dcaf0">●</span> Water Vendor (Order)</div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
@@ -25,26 +43,48 @@
     fetch("{% url 'water_source_map_data' %}")
         .then(response => response.json())
         .then(data => {
-            data.forEach(source => {
+            data.forEach(point => {
                 var color = 'green';
-                if(source.status === 'Maintenance') color = 'orange';
-                if(source.status === 'Broken/Non-Operational') color = 'red';
                 
-                var marker = L.circleMarker([source.lat, source.lon], {
+                if (point.color === 'danger') color = 'red';
+                if (point.color === 'warning') color = 'orange';
+                if (point.type === 'vendor') color = '#0dcaf0';
+
+                var marker = L.circleMarker([point.lat, point.lon], {
                     color: color,
                     fillColor: color,
-                    fillOpacity: 0.7,
+                    fillOpacity: 0.8,
                     radius: 10
                 }).addTo(map);
 
-                marker.bindPopup(`
-                    <div class="text-center">
-                        <h6 class="fw-bold mb-1">${source.name}</h6>
-                        <span class="status-badge" style="background-color: ${color}">${source.status}</span>
-                        <hr class="my-2">
-                        <a href="/sources/${source.id}/" class="btn btn-sm btn-outline-primary">View Details</a>
-                    </div>
-                `);
+                var popupHtml = '';
+
+                if (point.type === 'vendor') {
+                    popupHtml = `
+                        <div class="text-center">
+                            <h6 class="fw-bold mb-1">${point.name}</h6>
+                            <span class="badge bg-info text-dark mb-2">Water Vendor</span>
+                            <p class="small text-muted mb-2">${point.status}</p>
+                            
+                            <a href="https://api.whatsapp.com/send?phone=${point.phone}&text=Hello, I saw you on the WaterConnect Map and want to place an order.%0a%0a📍 Location: %0a📦 Quantity: " 
+                               target="_blank" 
+                               class="btn btn-sm btn-info text-white fw-bold w-100">
+                               <i class="bi bi-whatsapp"></i> Order Now
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    popupHtml = `
+                        <div class="text-center">
+                            <h6 class="fw-bold mb-1">${point.name}</h6>
+                            <span class="status-badge" style="background-color: ${color}">${point.status}</span>
+                            <hr class="my-2">
+                            <a href="/sources/${point.id}/" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    `;
+                }
+
+                marker.bindPopup(popupHtml);
             });
         })
         .catch(error => console.error('Error loading map data:', error));

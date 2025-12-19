@@ -1,0 +1,55 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="fw-bold mb-4">Edit Business Profile</h3>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Business Name</label>
+                            {{ form.business_name }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Phone (254...)</label>
+                                {{ form.phone_number }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Location</label>
+                                {{ form.location_name }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Price per 20L</label>
+                                {{ form.price_per_20l }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Delivery Fee</label>
+                                {{ form.delivery_fee }}
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch mb-4 p-3 bg-light rounded">
+                            {{ form.is_open }}
+                            <label class="form-check-label fw-bold ms-2" for="id_is_open">
+                                Currently Open for Business?
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -26,4 +26,7 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('admin/export/issues/', views.export_issues_csv, name='export_issues_csv'),
     path('donate/', mpesa_views.mpesa_pay, name='mpesa_pay'),
+    path('vendors/', views.vendor_list, name='vendor_list'),
+    path('partner/', views.vendor_signup, name='vendor_signup'),
+    path('vendor/edit/', views.vendor_profile_edit, name='vendor_profile_edit'),
 ]

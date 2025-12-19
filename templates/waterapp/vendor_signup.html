@@ -1,0 +1,38 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-0" style="border-radius: 15px;">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-truck text-info display-4"></i>
+                        <h2 class="fw-bold mt-3">Partner with WaterConnect</h2>
+                        <p class="text-muted">Register your water delivery business today.</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <h5 class="fw-bold text-muted mb-3">Login Details</h5>
+                        <div class="mb-3">{{ form.username }}</div>
+                        <div class="mb-3">{{ form.email }}</div>
+                        <div class="mb-3">{{ form.password }}</div>
+
+                        <h5 class="fw-bold text-muted mt-4 mb-3">Business Details</h5>
+                        <div class="mb-3">{{ form.business_name }}</div>
+                        <div class="mb-3">{{ form.phone_number }}</div>
+                        <div class="mb-3">{{ form.location_name }}</div>
+                        <div class="mb-3">{{ form.price_per_20l }}</div>
+
+                        <button type="submit" class="btn btn-info w-100 text-white fw-bold py-2 mt-3 rounded-pill">
+                            Submit Application
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

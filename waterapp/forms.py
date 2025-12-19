@@ -1,8 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import WaterSource, IssueReport, RepairLog
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import WaterSource, IssueReport, RepairLog, WaterVendor
 
 class WaterSourceForm(forms.ModelForm):
     """Form for users to create/edit a WaterSource (No verification access)."""
@@ -42,19 +42,16 @@ class IssueReportForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
 
-# --- NEW: Admin Issue Report Form (Enables 'is_resolved') ---
 class AdminIssueReportForm(IssueReportForm):
     """Special form for Admins to mark issues as resolved."""
     class Meta(IssueReportForm.Meta):
         model = IssueReport
-        # Includes 'is_resolved' field for Admins
         fields = ['water_source', 'description', 'priority_level', 'is_resolved']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if 'is_resolved' in self.fields:
             self.fields['is_resolved'].widget.attrs.update({'class': 'form-check-input'})
-# -------------------------------------------------------------
 
 class RepairLogForm(forms.ModelForm):
     """Form for technicians to log a repair."""
@@ -89,7 +86,6 @@ class SignUpForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields['username'].help_text = ''
         
-        # Clean password help text
         if 'password' in self.fields:
              self.fields['password'].help_text = '' 
         if 'val_1' in self.fields:
@@ -99,7 +95,6 @@ class SignUpForm(UserCreationForm):
             self.fields[field_name].help_text = ''
             self.fields[field_name].widget.attrs.update({'class': 'form-control'})
             
-            # Autocomplete attributes for accessibility
             if field_name == 'username':
                 self.fields[field_name].widget.attrs['autocomplete'] = 'username'
             elif field_name == 'email':
@@ -163,3 +158,45 @@ class ContactForm(forms.Form):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+            
+
+class VendorSignUpForm(forms.ModelForm):
+    username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'}))
+    
+    business_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Business Name (e.g. Super Water & Refill Ltd)'}))
+    phone_number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone (e.g. 0712...)'}))
+    location_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Location (e.g. Near Market)'}))
+    price_per_20l = forms.DecimalField(widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Price per 20L', 'min': '0', 'step': '1.0'}))
+
+    class Meta:
+        model = WaterVendor
+        fields = ['business_name', 'phone_number', 'location_name', 'price_per_20l']
+
+    def save(self, commit=True):
+        user = User.objects.create_user(
+            username=self.cleaned_data['username'],
+            email=self.cleaned_data['email'],
+            password=self.cleaned_data['password']
+        )
+        vendor = super().save(commit=False)
+        vendor.user = user
+        vendor.is_verified = False
+        if commit:
+            vendor.save()
+        return vendor
+    
+class VendorProfileEditForm(forms.ModelForm):
+    """Form to allow vendors to edit their profile (including open/closed status)."""
+    class Meta:
+        model = WaterVendor
+        fields = ['business_name', 'phone_number', 'location_name', 'price_per_20l', 'delivery_fee', 'is_open']
+        widgets = {
+            'business_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '254...'}),
+            'location_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'price_per_20l': forms.NumberInput(attrs={'class': 'form-control'}),
+            'delivery_fee': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_open': forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'width: 2.5em; height: 1.5em;'}),
+        }

@@ -10,7 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'waterapp/css/main.css' %}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><path fill=%22%230dcaf0%22 d=%22M7.21.8C7.69.295 8 0 8 0c.109.363.234.7.405 1.02.482.908 1.163 1.884 1.72 2.757 1.154 1.81 2.97 4.692 2.97 7.252 0 2.793-2.32 5.06-5.18 5.06-2.86 0-5.18-2.267-5.18-5.06 0-2.56 1.815-5.442 2.97-7.252.556-.872 1.238-1.849 1.72-2.757.171-.32.296-.657.405-1.02.09-.3.303-.593.303-.593z%22/></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><path fill=%22%230dcaf0%22 d=%22M7.21.8C7.69.295 8 0 8 0c.109.363.234.7.405 1.02.482.908 1.163 1.884 1.72 2.757 1.154 1.81 2.97 4.692 2.97 7.252 0 2.793-2.32 5.06-5.18 5.06-2.86 0-5.18-2.267-5.18-5.06 0-2.56 1.815-5.442 2.97-7.252.556-.872 1.238-1.849 1.72-2.757.171-.32.296-.657.405-1.02.09-.3.303-.593.303-.593z%22/></svg>">
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -24,43 +25,47 @@
             </a>
 
             <div class="d-flex align-items-center gap-2 ms-auto order-lg-last">
-                
-                <a href="{% url 'mpesa_pay' %}" class="btn btn-sm rounded-pill text-white fw-bold px-3" 
-                   style="background-color: #43B02A; border: none;">
+
+                <a href="{% url 'mpesa_pay' %}" class="btn btn-sm rounded-pill text-white fw-bold px-3"
+                    style="background-color: #43B02A; border: none;">
                     <span class="d-none d-sm-inline">Donate</span> <i class="bi bi-coin"></i>
                 </a>
 
                 {% if user.is_authenticated %}
-                    <div class="dropdown">
-                        <a href="#" class="btn btn-sm btn-outline-light rounded-pill border-0 px-3 fw-bold dropdown-toggle" 
-                           data-bs-toggle="dropdown">
-                           <i class="bi bi-person-circle"></i> <span class="d-none d-sm-inline">{{ user.username }}</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                            {% if user.is_staff %}
-                                <li><a class="dropdown-item" href="/admin/" target="_blank">Admin Panel</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'profile' %}">My Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="post" action="{% url 'logout' %}">
-                                    {% csrf_token %}
-                                    <button class="dropdown-item text-danger">Logout</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+                <div class="dropdown">
+                    <a href="#" class="btn btn-sm btn-outline-light rounded-pill border-0 px-3 fw-bold dropdown-toggle"
+                        data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> <span class="d-none d-sm-inline">{{ user.username }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        {% if user.is_staff %}
+                        <li><a class="dropdown-item" href="/admin/" target="_blank">Admin Panel</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">My Profile</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button class="dropdown-item text-danger">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-sm btn-light fw-bold rounded-pill px-3">
-                        Login
-                    </a>
-                    <a href="{% url 'signup' %}" class="btn btn-sm btn-outline-light fw-bold rounded-pill px-3 d-none d-sm-inline-block">
-                        Sign Up
-                    </a>
+                <a href="{% url 'login' %}" class="btn btn-sm btn-light fw-bold rounded-pill px-3">
+                    Login
+                </a>
+                <a href="{% url 'signup' %}"
+                    class="btn btn-sm btn-outline-light fw-bold rounded-pill px-3 d-none d-sm-inline-block">
+                    Sign Up
+                </a>
                 {% endif %}
 
-                <button class="navbar-toggler ms-2 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler ms-2 border-0" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                    aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
             </div>
@@ -78,6 +83,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white px-3" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white px-3" href="{% url 'vendor_signup' %}">Partner with Us</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white px-3" href="{% url 'contact' %}">Contact</a>
@@ -131,4 +139,5 @@
         })();
     </script>
 </body>
+
 </html>

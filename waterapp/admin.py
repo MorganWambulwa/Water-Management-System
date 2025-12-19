@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.urls import path
-from .models import WaterSource, IssueReport, RepairLog
+from .models import WaterSource, IssueReport, RepairLog, WaterVendor, WaterOrder
+from . import views 
 from .forms import (
     RepairLogForm, 
     WaterSourceForm, 
@@ -11,7 +12,6 @@ from .forms import (
     AdminWaterSourceForm, 
     AdminIssueReportForm
 )
-from . import views 
 
 original_get_urls = admin.site.get_urls
 
@@ -53,6 +53,22 @@ class RepairLogAdmin(admin.ModelAdmin):
         css = {
             'all': ('waterapp/css/admin_custom.css',)
         }
+
+
+@admin.register(WaterVendor)
+class WaterVendorAdmin(admin.ModelAdmin):
+    list_display = ('business_name', 'location_name', 'is_open', 'price_per_20l', 'phone_number')
+    list_filter = ('is_open', 'location_name')
+    search_fields = ('business_name', 'user__username', 'location_name')
+    list_editable = ('is_open', 'price_per_20l')
+
+@admin.register(WaterOrder)
+class WaterOrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'customer', 'vendor', 'quantity', 'total_cost', 'status', 'created_at')
+    list_filter = ('status', 'vendor', 'created_at')
+    search_fields = ('customer__username', 'vendor__business_name', 'delivery_address')
+    readonly_fields = ('total_cost', 'created_at')
+
 
 admin.site.unregister(User)
 

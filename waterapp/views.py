@@ -6,24 +6,37 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import WaterSource, IssueReport, RepairLog
-from .forms import IssueReportForm, WaterSourceForm, RepairLogForm, SignUpForm, ProfileUpdateForm, VerificationRequestForm, ContactForm
 import csv 
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from .models import WaterSource, IssueReport, RepairLog, WaterVendor
+from .forms import (
+    IssueReportForm, 
+    WaterSourceForm, 
+    RepairLogForm, 
+    SignUpForm, 
+    ProfileUpdateForm, 
+    VerificationRequestForm, 
+    ContactForm, 
+    VendorSignUpForm,
+    VendorProfileEditForm
+)
 
 def index(request):
-    """Landing page: Renders the public dashboard."""
+    """Landing page: Renders the public dashboard and Vendor list."""
     total_sources = WaterSource.objects.count()
     open_issues = IssueReport.objects.filter(is_resolved=False).count()
     operational_sources = WaterSource.objects.filter(status='O').count()
     live_status_sources = WaterSource.objects.all().order_by('-last_updated')[:5]
+
+    vendors = WaterVendor.objects.filter(is_open=True, is_verified=True)[:6]
 
     context = {
         'total_sources': total_sources,
         'open_issues': open_issues,
         'operational_sources': operational_sources,
         'live_status_sources': live_status_sources,
+        'vendors': vendors, 
     }
     return render(request, 'waterapp/index.html', context)
 
@@ -63,20 +76,57 @@ def water_source_map(request):
     return render(request, 'waterapp/water_source_map.html')
 
 def water_source_map_data(request):
-    """JSON API endpoint for the map."""
+    """JSON API endpoint for the map. Now includes Vendors."""
     sources = WaterSource.objects.all()
-    data = [
-        {
+    
+    vendors = WaterVendor.objects.filter(
+        is_open=True, 
+        is_verified=True
+    ).exclude(latitude__isnull=True).exclude(longitude__isnull=True)
+    
+    data = []
+
+    for s in sources:
+        data.append({
+            'type': 'source', 
             'id': s.pk, 
             'name': s.name, 
             'lat': float(s.latitude),
             'lon': float(s.longitude), 
             'status': s.get_status_display(),
             'color': s.status_color
-        } 
-        for s in sources
-    ]
+        })
+
+    for v in vendors:
+        data.append({
+            'type': 'vendor',
+            'id': v.pk,
+            'name': f"{v.business_name} (Water Vendor)",
+            'lat': float(v.latitude),
+            'lon': float(v.longitude),
+            'status': f"Selling @ KES {v.price_per_20l}/20L",
+            'phone': v.whatsapp_number, 
+            'color': 'info' 
+        })
+        
     return JsonResponse(data, safe=False)
+
+def vendor_list(request):
+    """Page to see ALL vendors without limits."""
+    vendors = WaterVendor.objects.filter(is_open=True, is_verified=True)
+    return render(request, 'waterapp/vendor_list.html', {'vendors': vendors})
+
+def vendor_signup(request):
+    """Allows a water vendor to register."""
+    if request.method == 'POST':
+        form = VendorSignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Registration successful! Your account is pending approval from the Admin.")
+            return redirect('index')
+    else:
+        form = VendorSignUpForm()
+    return render(request, 'waterapp/vendor_signup.html', {'form': form})
 
 def water_source_detail(request, pk):
     """Detailed view of a single water source."""
@@ -108,7 +158,7 @@ def issue_report_create(request):
 @login_required
 def dashboard(request):
     """
-    Renders different dashboards based on user role.
+    Renders different dashboards based on user role: Admin, Vendor, or Resident.
     """
     
     if request.user.is_staff:
@@ -128,6 +178,13 @@ def dashboard(request):
         }
         return render(request, 'waterapp/dashboard.html', context)
     
+    elif hasattr(request.user, 'vendor_profile'):
+        vendor = request.user.vendor_profile
+        context = {
+            'vendor': vendor,
+        }
+        return render(request, 'waterapp/vendor_dashboard.html', context)
+
     else:
         user_issues = IssueReport.objects.filter(reporter=request.user).order_by('-reported_at')
         resolved_notifications = IssueReport.objects.filter(
@@ -155,6 +212,25 @@ def profile(request):
         form = ProfileUpdateForm(instance=request.user)
     
     return render(request, 'waterapp/profile.html', {'form': form})
+
+@login_required
+def vendor_profile_edit(request):
+    """Allows a vendor to edit their own profile."""
+    if not hasattr(request.user, 'vendor_profile'):
+        raise PermissionDenied
+    
+    vendor = request.user.vendor_profile
+    
+    if request.method == 'POST':
+        form = VendorProfileEditForm(request.POST, instance=vendor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Business profile updated successfully!")
+            return redirect('dashboard')
+    else:
+        form = VendorProfileEditForm(instance=vendor)
+    
+    return render(request, 'waterapp/vendor_profile_edit.html', {'form': form})
 
 @login_required
 def water_source_create_update(request, pk=None):

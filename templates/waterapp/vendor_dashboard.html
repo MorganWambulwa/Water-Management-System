@@ -1,0 +1,91 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    {% if not vendor.is_verified %}
+    <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex align-items-center" role="alert">
+        <i class="bi bi-hourglass-split fs-4 me-3"></i>
+        <div>
+            <h5 class="alert-heading fw-bold mb-1">Account Pending Approval</h5>
+            <p class="mb-0 small">Your vendor profile is currently under review by the Admin. You will not appear on the
+                map or list until verified.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm text-center p-4 h-100" style="border-radius: 15px;">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-4">
+                            <i class="bi bi-shop fs-1 text-primary"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold text-dark">{{ vendor.business_name }}</h3>
+                    <p class="text-muted mb-4">{{ vendor.user.email }}</p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'vendor_profile_edit' %}" class="btn btn-outline-primary rounded-pill">
+                            <i class="bi bi-pencil me-2"></i> Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 15px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Business Overview</h4>
+
+                        {% if vendor.is_open %}
+                        <span class="badge bg-success px-3 py-2 rounded-pill">Currently Open</span>
+                        {% else %}
+                        <span class="badge bg-danger px-3 py-2 rounded-pill">Currently Closed</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block fw-bold text-uppercase">Pricing</small>
+                                <span class="fs-4 fw-bold text-dark">KES {{ vendor.price_per_20l }}</span>
+                                <span class="text-muted small">/ 20L</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block fw-bold text-uppercase">Delivery Fee</small>
+                                {% if vendor.delivery_fee == 0 %}
+                                <span class="fs-4 fw-bold text-info">Free</span>
+                                {% else %}
+                                <span class="fs-4 fw-bold text-dark">KES {{ vendor.delivery_fee }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded-3">
+                                <small class="text-muted d-block fw-bold text-uppercase">WhatsApp Link Preview</small>
+                                <p class="text-muted small mb-0 mt-1">
+                                    <i class="bi bi-link-45deg me-1"></i>
+                                    <code>https://wa.me/{{ vendor.whatsapp_number }}</code>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="alert alert-info border-0 bg-info bg-opacity-10">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Note:</strong> Orders are currently received directly on your WhatsApp. Make sure your
+                        phone is on!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

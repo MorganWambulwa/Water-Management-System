@@ -4,14 +4,14 @@
 <div class="hero-section d-flex align-items-center">
     <div class="container">
         <div class="row align-items-center">
-            
+
             <div class="col-lg-6 mb-5 mb-lg-0">
                 <h1 class="display-3 fw-bold mb-3">Smart Water Management <br> System</h1>
                 <p class="lead mb-4" style="opacity: 0.9;">
-                    WaterConnect ensures functional, safe and well maintained water sources 
+                    WaterConnect ensures functional, safe and well maintained water sources
                     using real-time data and community reporting.
                 </p>
-                
+
                 <div class="d-flex gap-3">
                     <a href="{% url 'issue_report_create' %}" class="btn btn-danger-custom rounded-pill">
                         <i class="bi bi-exclamation-triangle me-2"></i> Report an Issue
@@ -26,12 +26,14 @@
                 <div class="glass-card p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="mb-0 fw-bold">Live Network Status</h5>
-                        <span class="badge bg-success rounded-circle p-1"><span class="visually-hidden">Online</span></span>
+                        <span class="badge bg-success rounded-circle p-1"><span
+                                class="visually-hidden">Online</span></span>
                     </div>
 
                     <div class="status-scroll-box d-flex flex-column gap-3 pe-2">
                         {% for source in live_status_sources %}
-                        <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: rgba(0,0,0,0.2);">
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded"
+                            style="background: rgba(0,0,0,0.2);">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-broadcast me-3 opacity-75"></i>
                                 <span class="fw-medium">{{ source.name }}</span>
@@ -82,6 +84,69 @@
     </div>
 </div>
 
+{% if vendors %}
+<div class="container py-5 mt-4">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-1 rounded-pill fw-bold"
+                    style="font-size: 0.75rem;">NEW SERVICE</span>
+                <h3 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-droplet-half text-info me-2"></i>Order Water Refills
+                </h3>
+            </div>
+            <a href="{% url 'vendor_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                View All Vendors <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for vendor in vendors %}
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 shadow-sm border-0 bg-white"
+                style="border-radius: 15px; transition: transform 0.2s;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold mb-0 text-dark">{{ vendor.business_name }}</h5>
+                        {% if vendor.is_open %}
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Open</span>
+                        {% else %}
+                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">Closed</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="text-muted small mb-3">
+                        <i class="bi bi-geo-alt-fill me-1 text-secondary"></i> {{ vendor.location_name }}
+                    </p>
+
+                    <div class="d-flex align-items-end justify-content-between mb-3 bg-light p-2 rounded">
+                        <div>
+                            <span class="text-muted small d-block" style="font-size: 0.75rem;">Price / 20L</span>
+                            <span class="fw-bold text-primary">KES {{ vendor.price_per_20l }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-muted small d-block" style="font-size: 0.75rem;">Delivery</span>
+                            {% if vendor.delivery_fee == 0 %}
+                            <span class="badge bg-info text-white">Free</span>
+                            {% else %}
+                            <span class="fw-bold text-dark small">KES {{ vendor.delivery_fee }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <a href="https://api.whatsapp.com/send?phone={{ vendor.whatsapp_number }}&text=Hello {{ vendor.business_name }}, I would like to place an order via WaterConnect.%0a%0a Location: %0a Quantity: "
+                        target="_blank" class="btn btn-info w-100 text-white fw-bold rounded-pill">
+                        <i class="bi bi-whatsapp me-2"></i> Order Now
+                    </a>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 <div class="container py-5 my-5">
     <div class="row align-items-center">
         <div class="col-lg-6">
@@ -90,10 +155,10 @@
             </span>
             <h2 class="display-5 fw-bold mb-4">Locate Clean Water Near You</h2>
             <p class="text-muted lead mb-4">
-                Our interactive map helps you find the nearest registered safe water points. 
+                Our interactive map helps you find the nearest registered safe water points.
                 View real-time status updates, check water quality reports and get directions instantly.
             </p>
-            
+
             <ul class="list-unstyled mb-5">
                 <li class="mb-3 d-flex align-items-center">
                     <i class="bi bi-check-circle-fill text-info me-3 fs-5"></i>
@@ -126,11 +191,11 @@
                             <small class="text-muted">System Admin</small>
                         </div>
                     </div>
-                    
+
                     <div style="height: 150px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px;"></div>
-                    
                     <div class="p-3 rounded border border-light bg-light">
-                        <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Latest Activity</small>
+                        <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Latest
+                            Activity</small>
                         <div class="d-flex justify-content-between align-items-center mt-2">
                             <span class="fw-bold">New Source Verified: Zone 4</span>
                             <i class="bi bi-check-circle-fill text-success fs-5"></i>
