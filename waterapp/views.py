@@ -1,3 +1,4 @@
+import threading
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
@@ -28,16 +29,32 @@ from .forms import (
     VendorIssueReportForm
 )
 
+class EmailThread(threading.Thread):
+    def __init__(self, subject, plain_message, recipient_emails, html_message):
+        self.subject = subject
+        self.plain_message = plain_message
+        self.recipient_emails = recipient_emails
+        self.html_message = html_message
+        threading.Thread.__init__(self)
+
+    def run(self):
+        try:
+            send_mail(
+                self.subject,
+                self.plain_message,
+                settings.EMAIL_HOST_USER,
+                self.recipient_emails,
+                html_message=self.html_message,
+                fail_silently=True
+            )
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+
 def notify_maintenance_team(request, report, source_name, source_type):
-    """
-    Sends a beautiful HTML email alert to ALL Admins and Technicians.
-    Includes a direct link to the dashboard for quick response.
-    """
     staff_members = User.objects.filter(is_staff=True).exclude(email='')
     recipient_emails = [user.email for user in staff_members]
 
     if not recipient_emails:
-        print("No staff emails found to notify.")
         return
 
     context = {
@@ -53,23 +70,11 @@ def notify_maintenance_team(request, report, source_name, source_type):
     html_message = render_to_string('waterapp/issue_report_email.html', context)
     plain_message = strip_tags(html_message)
 
-    subject = f" ACTION REQUIRED: {source_type} Issue at {source_name}"
+    subject = f"ACTION REQUIRED: {source_type} Issue at {source_name}"
 
-    try:
-        send_mail(
-            subject,
-            plain_message, 
-            settings.EMAIL_HOST_USER,
-            recipient_emails,
-            html_message=html_message,
-            fail_silently=True
-        )
-        print(f"HTML Alert sent to {len(recipient_emails)} staff members.")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+    EmailThread(subject, plain_message, recipient_emails, html_message).start()
 
 def index(request):
-    """Landing page: Renders the public dashboard and Vendor list."""
     total_sources = WaterSource.objects.count()
     open_issues = IssueReport.objects.filter(is_resolved=False).count()
     operational_sources = WaterSource.objects.filter(status='O').count()
@@ -87,11 +92,9 @@ def index(request):
     return render(request, 'waterapp/index.html', context)
 
 def about(request):
-    """Render the About page."""
     return render(request, 'waterapp/about.html')
 
 def signup(request):
-    """Handles user registration."""
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -103,7 +106,6 @@ def signup(request):
 
 
 def water_source_list(request):
-    """List of all water sources for public viewing."""
     sources = WaterSource.objects.all()
     query = request.GET.get('q')
     if query:
@@ -118,11 +120,9 @@ def water_source_list(request):
     return render(request, 'waterapp/water_source_list.html', {'sources': sources})
 
 def water_source_map(request):
-    """Renders the map page."""
     return render(request, 'waterapp/water_source_map.html')
 
 def water_source_map_data(request):
-    """JSON API endpoint for the map. Tags items for filtering."""
     sources = WaterSource.objects.all()
     
     vendors = WaterVendor.objects.filter(
@@ -157,12 +157,10 @@ def water_source_map_data(request):
     return JsonResponse(data, safe=False)
 
 def vendor_list(request):
-    """Page to see ALL vendors without limits."""
     vendors = WaterVendor.objects.filter(is_open=True, is_verified=True)
     return render(request, 'waterapp/vendor_list.html', {'vendors': vendors})
 
 def vendor_signup(request):
-    """Allows a water vendor to register."""
     if request.method == 'POST':
         form = VendorSignUpForm(request.POST)
         if form.is_valid():
@@ -174,7 +172,6 @@ def vendor_signup(request):
     return render(request, 'waterapp/vendor_signup.html', {'form': form})
 
 def water_source_detail(request, pk):
-    """Detailed view of a single water source."""
     source = get_object_or_404(WaterSource.objects.prefetch_related('issues', 'repairs'), pk=pk)
     open_issues = [issue for issue in source.issues.all() if not issue.is_resolved]
     repair_history = source.repairs.all()
@@ -188,7 +185,6 @@ def water_source_detail(request, pk):
 
 @login_required 
 def issue_report_create(request):
-    """Allows a resident to submit a new issue report and notifies technicians."""
     if request.method == 'POST':
         form = IssueReportForm(request.POST)
         if form.is_valid():
@@ -210,10 +206,6 @@ def issue_report_create(request):
 
 @login_required
 def dashboard(request):
-    """
-    Renders different dashboards based on user role: Admin, Vendor, or Resident.
-    """
-    
     if request.user.is_staff:
         sources = WaterSource.objects.all().order_by('name')
         open_issues = IssueReport.objects.filter(is_resolved=False).order_by('-priority_level', '-reported_at')
@@ -274,7 +266,6 @@ def dashboard(request):
 
 @login_required
 def profile(request):
-    """Handles the user profile view and updates."""
     if request.method == 'POST':
         form = ProfileUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -287,7 +278,6 @@ def profile(request):
 
 @login_required
 def vendor_profile_edit(request):
-    """Allows a vendor to edit their own profile."""
     if not hasattr(request.user, 'vendor_profile'):
         raise PermissionDenied
     
@@ -306,7 +296,6 @@ def vendor_profile_edit(request):
 
 @login_required
 def vendor_report_issue(request):
-    """Allows a Vendor to report a maintenance issue at their shop."""
     if not hasattr(request.user, 'vendor_profile'):
         messages.error(request, "Only registered vendors can request repairs.")
         return redirect('index')
@@ -337,7 +326,6 @@ def vendor_report_issue(request):
 
 @login_required
 def water_source_create_update(request, pk=None):
-    """Handles both creation and updating of a WaterSource."""
     if pk:
         source = get_object_or_404(WaterSource, pk=pk)
     else:
@@ -358,7 +346,6 @@ def water_source_create_update(request, pk=None):
 
 @login_required
 def water_source_delete(request, pk):
-    """Deletes a water source after confirmation."""
     source = get_object_or_404(WaterSource, pk=pk)
     
     if source.created_by != request.user and not request.user.is_superuser:
@@ -371,7 +358,6 @@ def water_source_delete(request, pk):
 
 @login_required
 def request_verification(request, pk):
-    """Allows the creator to request verification via email."""
     source = get_object_or_404(WaterSource, pk=pk)
     
     if source.created_by != request.user:
@@ -403,17 +389,9 @@ def request_verification(request, pk):
             Review this source in the admin panel:
             https://water-management-system-ouep.onrender.com/admin/waterapp/watersource/{source.pk}/change/
             """
-            try:
-                send_mail(
-                    subject,
-                    email_body,
-                    settings.EMAIL_HOST_USER,
-                    [settings.EMAIL_HOST_USER],
-                    fail_silently=False,
-                )
-                messages.success(request, "Verification request sent successfully!")
-            except Exception as e:
-                messages.error(request, f"Failed to send email. Error: {str(e)}")
+            
+            EmailThread(subject, email_body, [settings.EMAIL_HOST_USER], None).start()
+            messages.success(request, "Verification request sent successfully!")
                 
             return redirect('water_source_detail', pk=pk)
     else:
@@ -423,7 +401,6 @@ def request_verification(request, pk):
 
 @login_required
 def repair_log_create(request, source_pk):
-    """Allows a technician to log a repair."""
     source = get_object_or_404(WaterSource, pk=source_pk)
     if request.method == 'POST':
         form = RepairLogForm(request.POST)
@@ -444,7 +421,6 @@ def repair_log_create(request, source_pk):
 
 @login_required
 def issue_toggle_resolve(request, pk):
-    """Toggles the 'is_resolved' status."""
     issue = get_object_or_404(IssueReport, pk=pk)
     if request.method == 'POST':
         issue.is_resolved = not issue.is_resolved
@@ -453,7 +429,6 @@ def issue_toggle_resolve(request, pk):
 
 @login_required
 def export_issues_csv(request):
-    """Exports all open issues to a CSV file."""
     if not request.user.is_staff:
         raise PermissionDenied("You do not have permission to access this page.")
         
@@ -478,7 +453,6 @@ def export_issues_csv(request):
     return response
 
 def contact(request):
-    """Renders the Contact page and handles HTML email submission."""
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
@@ -494,28 +468,16 @@ def contact(request):
             
             subject = f"New Contact: {form.cleaned_data['subject']}"
             
-            try:
-                send_mail(
-                    subject,
-                    plain_message,
-                    settings.EMAIL_HOST_USER,
-                    [settings.EMAIL_HOST_USER],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
+            EmailThread(subject, plain_message, [settings.EMAIL_HOST_USER], html_message).start()
 
-                messages.success(request, "Your message has been sent.")
-                return redirect('contact')
-            except Exception as e:
-                messages.error(request, "Failed to send message. Please try again.")
+            messages.success(request, "Your message has been sent.")
+            return redirect('contact')
     else:
         form = ContactForm()
 
     return render(request, 'waterapp/contact.html', {'form': form})
 
 def legal_page(request, page_type):
-    """Renders the Privacy, Terms, and Cookie policies with detailed content."""
-    
     h_style = "fw-bold text-dark mt-4 mb-3"
     p_style = "text-muted mb-3"
     ul_style = "text-muted mb-4"
@@ -592,13 +554,11 @@ def legal_page(request, page_type):
     return render(request, 'waterapp/legal_page.html', {'data': data})
 
 def track_vendor_click(request, vendor_id):
-    """API to record a click on the Order button."""
     vendor = get_object_or_404(WaterVendor, pk=vendor_id)
     VendorClickLog.objects.create(vendor=vendor)
     return JsonResponse({'status': 'success'})
 
 def vendor_public_profile(request, pk):
-    """Public profile for a vendor: shows details and reviews."""
     vendor = get_object_or_404(WaterVendor, pk=pk)
     reviews = vendor.reviews.all()
     
@@ -631,10 +591,6 @@ def vendor_public_profile(request, pk):
 
 @login_required
 def initiate_payment(request, vendor_id):
-    """
-    1. Gets Phone + Amount from User.
-    2. Triggers REAL M-Pesa STK Push (Popup).
-    """
     vendor = get_object_or_404(WaterVendor, pk=vendor_id)
     
     if request.method == "POST":
@@ -672,7 +628,6 @@ def initiate_payment(request, vendor_id):
 
 
 def donate(request):
-    """Donation (Any Amount) using Django-Daraja."""
     if request.method == 'POST':
         phone = request.POST.get('phone')
         amount = request.POST.get('amount')
@@ -702,7 +657,6 @@ def donate(request):
 
 @login_required
 def transaction_history(request):
-    """Displays a list of M-Pesa payments made by the logged-in user."""
     user_phone = request.user.username
     
     transactions = MpesaTransaction.objects.filter(
