@@ -1,4 +1,4 @@
-{% extends 'waterapp/base.html' %}
+{% extends 'waterapp/base.html' %} 
 
 {% block content %}
 <div class="container" style="padding-top: 100px;">
@@ -13,21 +13,35 @@
     {% if resolved_notifications %}
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm bg-success bg-opacity-10">
-                <div class="card-body">
-                    <h5 class="card-title text-success fw-bold"><i class="bi bi-bell-fill"></i> Good News!</h5>
-                    <ul class="list-unstyled mb-0">
-                        {% for note in resolved_notifications %}
-                        <li class="mb-1">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            The issue you reported at <strong>{{ note.water_source.name }}</strong> has been fixed!
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+            <div id="notification-box" class="alert alert-success alert-dismissible fade show shadow-sm bg-success bg-opacity-10 border-0" role="alert">
+                <h5 class="alert-heading text-success fw-bold"><i class="bi bi-bell-fill me-2"></i> Good News!</h5>
+                <ul class="list-unstyled mb-0">
+                    {% for note in resolved_notifications %}
+                    <li class="mb-1">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        The issue you reported at <strong>{{ note.water_source.name }}</strong> has been fixed!
+                    </li>
+                    {% endfor %}
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var box = document.getElementById('notification-box');
+                if (box) {
+                    box.classList.remove('show'); 
+                    
+                    setTimeout(function() {
+                        box.remove();
+                    }, 1000);
+                }
+            }, 8000);
+        });
+    </script>
     {% endif %}
 
     <div class="row">
