@@ -88,13 +88,10 @@
 <div class="container py-5 mt-4">
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-1 rounded-pill fw-bold"
-                    style="font-size: 0.75rem;">NEW SERVICE</span>
-                <h3 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-droplet-half text-info me-2"></i>Order Water Refills
-                </h3>
-            </div>
+            <span class="badge bg-info text-white mb-0 px-3 py-2 rounded-pill fw-bold shadow-sm">
+                WATER REFILLS
+            </span>
+
             <a href="{% url 'vendor_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
                 View All Vendors <i class="bi bi-arrow-right ms-1"></i>
             </a>
@@ -107,12 +104,16 @@
             <div class="card h-100 shadow-sm border-0 bg-white"
                 style="border-radius: 15px; transition: transform 0.2s;">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold mb-0 text-dark">{{ vendor.business_name }}</h5>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title fw-bold mb-0 text-truncate">{{ vendor.business_name }}</h5>
+
                         {% if vendor.is_open %}
-                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Open</span>
+                        <span class="badge bg-success rounded-pill" style="font-size: 0.75rem;"> Open
+                        </span>
                         {% else %}
-                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">Closed</span>
+                        <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;"> Closed
+                        </span>
                         {% endif %}
                     </div>
 
@@ -135,11 +136,22 @@
                         </div>
                     </div>
 
+                    <a href="{% url 'vendor_public_profile' vendor.pk %}"
+                        class="btn btn-outline-dark w-100 rounded-pill mb-2">
+                        View Profile & Reviews
+                    </a>
+
+                    {% if vendor.is_open %}
                     <a href="https://api.whatsapp.com/send?phone={{ vendor.whatsapp_number }}&text=Hello {{ vendor.business_name }}, I would like to place an order via WaterConnect.%0a%0a Location: %0a Quantity: "
                         target="_blank" class="btn btn-info w-100 text-white fw-bold rounded-pill">
                         <i class="bi bi-whatsapp me-2"></i> Order Now
                     </a>
-                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary w-100 fw-bold rounded-pill" disabled>
+                        <i class="bi bi-clock-history me-2"></i> Currently Closed
+                    </button>
+                    {% endif %}
+
                 </div>
             </div>
         </div>
@@ -147,30 +159,32 @@
     </div>
 </div>
 {% endif %}
+
 <div class="container py-5 my-5">
     <div class="row align-items-center">
         <div class="col-lg-6">
-            <span class="badge bg-info bg-opacity-10 text-info mb-3 px-3 py-2 rounded-pill fw-bold">
-                COMMUNITY ACCESS
+            <span class="badge bg-info text-white mb-0 px-3 py-2 rounded-pill fw-bold shadow-sm">
+                ACCESS & REFILLS
             </span>
-            <h2 class="display-5 fw-bold mb-4">Locate Clean Water Near You</h2>
+            <h2 class="display-5 fw-bold mb-4">Find Public Wells or Order Purified Water</h2>
             <p class="text-muted lead mb-4">
-                Our interactive map helps you find the nearest registered safe water points.
-                View real-time status updates, check water quality reports and get directions instantly.
+                Our interactive map connects you to both <strong>free community water points</strong> and
+                <strong>verified refill stations</strong>.<br><br>
+                Check real-time status for public wells or browse vendor prices and place orders for delivery instantly.
             </p>
 
             <ul class="list-unstyled mb-5">
                 <li class="mb-3 d-flex align-items-center">
                     <i class="bi bi-check-circle-fill text-info me-3 fs-5"></i>
-                    <span>Real-time functionality status</span>
+                    <span>Real-time status for public sources</span>
                 </li>
                 <li class="mb-3 d-flex align-items-center">
-                    <i class="bi bi-check-circle-fill text-info me-3 fs-5"></i>
-                    <span>Water quality verification badges</span>
+                    <i class="bi bi-shop text-warning me-3 fs-5"></i>
+                    <span>Verified commercial refill stations</span>
                 </li>
                 <li class="mb-3 d-flex align-items-center">
-                    <i class="bi bi-check-circle-fill text-info me-3 fs-5"></i>
-                    <span>Community-driven reporting system</span>
+                    <i class="bi bi-whatsapp text-success me-3 fs-5"></i>
+                    <span>Direct WhatsApp ordering & delivery</span>
                 </li>
             </ul>
 

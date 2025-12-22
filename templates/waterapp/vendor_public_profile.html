@@ -1,0 +1,139 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg overflow-hidden mb-5" style="border-radius: 20px;">
+                
+                <div class="card-header bg-primary bg-gradient text-white p-5 text-center">
+                    
+                    {% if vendor.image %}
+                        <img src="{{ vendor.image.url }}" alt="{{ vendor.business_name }}" 
+                             class="rounded-circle mb-3 shadow-sm" 
+                             style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-white rounded-circle d-inline-flex p-3 mb-3 shadow-sm align-items-center justify-content-center" 
+                             style="width: 100px; height: 100px;">
+                            <i class="bi bi-shop fs-1 text-primary"></i>
+                        </div>
+                    {% endif %}
+
+                    <h2 class="fw-bold mb-1">{{ vendor.business_name }}</h2>
+                    <p class="opacity-75 mb-3">{{ vendor.location_name }}</p>
+
+                    {% if vendor.is_open %}
+                    <span class="badge bg-success text-uppercase px-3 py-2">Open Now</span>
+                    {% else %}
+                    <span class="badge bg-danger text-uppercase px-3 py-2">Closed</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <div class="row text-center mb-4">
+                        <div class="col-6 border-end">
+                            <h5 class="text-muted text-uppercase small fw-bold">Price / 20L</h5>
+                            <p class="display-6 fw-bold text-dark mb-0">KES {{ vendor.price_per_20l }}</p>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="text-muted text-uppercase small fw-bold">Delivery</h5>
+                            {% if vendor.delivery_fee == 0 %}
+                            <p class="display-6 fw-bold text-success mb-0">Free</p>
+                            {% else %}
+                            <p class="display-6 fw-bold text-dark mb-0">KES {{ vendor.delivery_fee }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 col-lg-6 mx-auto mb-5">
+                        <a href="https://wa.me/{{ vendor.whatsapp_number }}?text=Hello, I would like to order water."
+                            target="_blank" onclick="trackProfileClick('{{ vendor.id }}')"
+                            class="btn btn-success btn-lg rounded-pill shadow-sm">
+                            <i class="bi bi-whatsapp me-2"></i> Order Water on WhatsApp
+                        </a>
+                        <small class="text-center text-muted">Or call: {{ vendor.phone_number }}</small>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mt-5">
+                        <div class="col-md-5 mb-4">
+                            <h4 class="fw-bold mb-3">Rate this Vendor</h4>
+                            <div class="card bg-light border-0 p-4 rounded-3">
+                                <div class="text-center mb-3">
+                                    <h1 class="fw-bold display-4">{{ average_rating }}</h1>
+                                    <div class="text-warning fs-4">
+                                        ★ <span class="text-muted fs-6">/ 5.0</span>
+                                    </div>
+                                    <small class="text-muted">{{ reviews.count }} verified reviews</small>
+                                </div>
+
+                                {% if user.is_authenticated %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small">Your Rating</label>
+                                        {{ form.rating }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small">Your Review</label>
+                                        {{ form.comment }}
+                                    </div>
+                                    <button type="submit" class="btn btn-dark w-100 rounded-pill">Post Review</button>
+                                </form>
+                                {% else %}
+                                <div class="text-center mt-3">
+                                    <p class="small text-muted">Have you ordered from here?</p>
+                                    <a href="{% url 'login' %}?next={{ request.path }}"
+                                        class="btn btn-outline-dark btn-sm rounded-pill">Log in to Review</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <h4 class="fw-bold mb-3">Recent Feedback</h4>
+
+                            {% if reviews %}
+                            <div class="vstack gap-3">
+                                {% for review in reviews %}
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="fw-bold mb-0">{{ review.author.username }}</h6>
+                                            <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                        <div class="text-warning mb-2">
+                                            {% if review.rating == 5 %}★★★★★
+                                            {% elif review.rating == 4 %}★★★★☆
+                                            {% elif review.rating == 3 %}★★★☆☆
+                                            {% elif review.rating == 2 %}★★☆☆☆
+                                            {% else %}★☆☆☆☆{% endif %}
+                                        </div>
+                                        <p class="text-muted mb-0">{{ review.comment }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-chat-square-dots fs-1 mb-2 d-block opacity-25"></i>
+                                <p>No reviews yet. Be the first to review!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function trackProfileClick(vendorId) {
+        fetch(`/api/track-click/${vendorId}/`)
+            .then(response => console.log("Profile click tracked"))
+            .catch(error => console.error("Error tracking click", error));
+    }
+</script>
+{% endblock %}

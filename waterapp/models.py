@@ -54,12 +54,14 @@ class WaterSource(models.Model):
         return 'secondary'
 
 class IssueReport(models.Model):
-    """Report submitted by a resident about a water source issue."""
-    water_source = models.ForeignKey(WaterSource, on_delete=models.CASCADE, related_name='issues')
+    """Report submitted about a water source OR a vendor's equipment."""
+    water_source = models.ForeignKey(WaterSource, on_delete=models.CASCADE, related_name='issues', null=True, blank=True)
+    
+    vendor = models.ForeignKey('WaterVendor', on_delete=models.CASCADE, related_name='issues', null=True, blank=True)
+    
     reporter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField()
     reported_at = models.DateTimeField(auto_now_add=True)
-    
     is_resolved = models.BooleanField(default=False)
     
     priority_level = models.IntegerField(
@@ -72,7 +74,8 @@ class IssueReport(models.Model):
         ordering = ['-reported_at']
 
     def __str__(self):
-        return f"Issue on {self.water_source.name} - Resolved: {self.is_resolved}"
+        target = self.water_source.name if self.water_source else self.vendor.business_name
+        return f"Issue at {target} - Resolved: {self.is_resolved}"
 
 class RepairLog(models.Model):
     """Log of maintenance/repair work done on a water source."""
@@ -108,6 +111,7 @@ class WaterVendor(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
+    image = models.ImageField(upload_to='vendor_images/', blank=True, null=True)
     is_open = models.BooleanField(default=True, help_text="Toggle this to show/hide on the map")
     is_verified = models.BooleanField(default=False, help_text="Admin must check this for vendor to appear on map")
     
@@ -176,3 +180,36 @@ class WaterOrder(models.Model):
 
     def __str__(self):
         return f"Order #{self.id}: {self.customer.username} -> {self.vendor.business_name}"
+    
+class VendorClickLog(models.Model):
+    """Tracks every time a user clicks 'Order Now' on a vendor."""
+    vendor = models.ForeignKey(WaterVendor, on_delete=models.CASCADE, related_name='click_logs')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Click for {self.vendor.business_name} at {self.timestamp}"
+    
+class VendorReview(models.Model):
+    """Allows residents to rate and review vendors."""
+    vendor = models.ForeignKey(WaterVendor, on_delete=models.CASCADE, related_name='reviews')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.rating} Stars for {self.vendor.business_name} by {self.author.username}"
+    
+class MpesaTransaction(models.Model):
+    transaction_code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    phone_number = models.CharField(max_length=15)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, default="Pending")
+    vendor = models.ForeignKey(WaterVendor, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.phone_number} - {self.amount} ({self.status})"

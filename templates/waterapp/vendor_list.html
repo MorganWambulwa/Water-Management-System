@@ -4,11 +4,8 @@
 <div class="container py-5 mt-5">
     <div class="row mb-5 text-center">
         <div class="col-lg-8 mx-auto">
-            <span class="badge bg-info bg-opacity-10 text-info mb-2 px-3 py-2 rounded-pill fw-bold">MARKETPLACE</span>
-            <h1 class="display-4 fw-bold">Water Vendor Directory</h1>
-            <p class="lead text-muted">
-                Find reliable water delivery services near you. All vendors listed here are verified and currently open for business.
-            </p>
+            <span class="badge bg-info text-white mb-0 px-3 py-2 rounded-pill fw-bold shadow-sm">MARKETPLACE</span>
+            <h1 class="display-6 fw-bold">Water Refills Available Near You.</h1>
         </div>
     </div>
 
@@ -46,7 +43,7 @@
                         </div>
                     </div>
 
-                    <a href="https://api.whatsapp.com/send?phone={{ vendor.whatsapp_number }}&text=Hello {{ vendor.business_name }}, I would like to place an order via WaterConnect.%0a%0a📍 Location: %0a📦 Quantity: " 
+                    <a href="https://api.whatsapp.com/send?phone={{ vendor.whatsapp_number }}&text=Hello {{ vendor.business_name }}, Kindly deliver water to .%0a%0a Location: %0a Quantity: " 
                        target="_blank" 
                        class="btn btn-info w-100 text-white fw-bold rounded-pill">
                        <i class="bi bi-whatsapp me-2"></i> Order Now

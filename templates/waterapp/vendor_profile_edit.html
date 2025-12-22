@@ -3,49 +3,84 @@
 {% block content %}
 <div class="container py-5 mt-5">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <h3 class="fw-bold mb-4">Edit Business Profile</h3>
-                    
-                    <form method="post">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white p-4 text-center">
+                    <h3 class="mb-1 fw-bold">Edit Business Profile</h3>
+                    <p class="mb-0 opacity-75">Update your shop details, pricing and status</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
+
+                        <h5 class="text-primary fw-bold mb-4"><i class="bi bi-shop me-2"></i> Shop Details</h5>
                         
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Business Name</label>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Business Name</label>
                             {{ form.business_name }}
                         </div>
-                        
+
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Phone (254...)</label>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Phone (254...)</label>
                                 {{ form.phone_number }}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Location</label>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Location</label>
                                 {{ form.location_name }}
                             </div>
                         </div>
 
+                        <h5 class="text-primary fw-bold mb-4 mt-2"><i class="bi bi-tag me-2"></i> Pricing</h5>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Price per 20L</label>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Price per 20L (KES)</label>
                                 {{ form.price_per_20l }}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Delivery Fee</label>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Delivery Fee (KES)</label>
                                 {{ form.delivery_fee }}
                             </div>
                         </div>
 
-                        <div class="form-check form-switch mb-4 p-3 bg-light rounded">
-                            {{ form.is_open }}
-                            <label class="form-check-label fw-bold ms-2" for="id_is_open">
-                                Currently Open for Business?
-                            </label>
+                        <h5 class="text-primary fw-bold mb-4 mt-2"><i class="bi bi-image me-2"></i> Shop Image</h5>
+                        <div class="mb-4 p-3 bg-light rounded-3 border">
+                            <label class="form-label fw-bold mb-2">Upload Logo / Shop Photo</label>
+                            
+                            {% if form.instance.image %}
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ form.instance.image.url }}" alt="Current" 
+                                     class="rounded-circle shadow-sm me-3" 
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                <span class="text-muted small">Current Image</span>
+                            </div>
+                            {% endif %}
+                            
+                            {{ form.image }}
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill">Save Changes</button>
+                        <div class="mb-5 p-3 bg-light rounded-3 border d-flex align-items-center">
+                            <div class="form-check form-switch">
+                                {{ form.is_open }}
+                                <label class="form-check-label fw-bold ms-2" for="{{ form.is_open.id_for_label }}">
+                                    Open for Business?
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                                <i class="bi bi-check-circle-fill me-2"></i> Save Changes
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <a href="{% url 'dashboard' %}" class="text-decoration-none text-muted small">
+                                <i class="bi bi-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+
                     </form>
                 </div>
             </div>

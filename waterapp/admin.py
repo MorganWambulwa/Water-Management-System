@@ -2,7 +2,16 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.urls import path
-from .models import WaterSource, IssueReport, RepairLog, WaterVendor, WaterOrder
+from .models import (
+    WaterSource, 
+    IssueReport, 
+    RepairLog, 
+    WaterVendor, 
+    WaterOrder, 
+    VendorClickLog, 
+    MpesaTransaction,
+    VendorReview     
+)
 from . import views 
 from .forms import (
     RepairLogForm, 
@@ -17,11 +26,9 @@ original_get_urls = admin.site.get_urls
 
 def get_admin_urls():
     urls = original_get_urls()
-    
     custom_urls = [
         path('export/issues/', views.export_issues_csv, name='export_issues_csv'),
     ]
-    
     return custom_urls + urls
 
 admin.site.get_urls = get_admin_urls
@@ -35,13 +42,28 @@ class WaterSourceAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
 
 
+
 @admin.register(IssueReport)
 class IssueReportAdmin(admin.ModelAdmin):
-    form = AdminIssueReportForm
     
-    list_display = ('water_source', 'priority_level', 'is_resolved', 'reported_at')
-    list_filter = ('is_resolved', 'priority_level')
-    search_fields = ('water_source__name', 'description')
+    list_display = ('id', 'report_target', 'priority_level', 'status_badge', 'reported_at')
+    list_filter = ('is_resolved', 'priority_level', 'water_source', 'vendor')
+    search_fields = ('description', 'water_source__name', 'vendor__business_name')
+    
+    fields = ('water_source', 'vendor', 'description', 'priority_level', 'is_resolved', 'reporter')
+
+    def report_target(self, obj):
+        if obj.vendor:
+            return f" Vendor: {obj.vendor.business_name}"
+        elif obj.water_source:
+            return f" Public: {obj.water_source.name}"
+        return "Unknown"
+    report_target.short_description = "Issue Location"
+
+    def status_badge(self, obj):
+        return " Resolved" if obj.is_resolved else " Open"
+    status_badge.short_description = "Status"
+
 
 
 @admin.register(RepairLog)
@@ -62,12 +84,30 @@ class WaterVendorAdmin(admin.ModelAdmin):
     search_fields = ('business_name', 'user__username', 'location_name')
     list_editable = ('is_open', 'price_per_20l')
 
+
 @admin.register(WaterOrder)
 class WaterOrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'customer', 'vendor', 'quantity', 'total_cost', 'status', 'created_at')
     list_filter = ('status', 'vendor', 'created_at')
     search_fields = ('customer__username', 'vendor__business_name', 'delivery_address')
     readonly_fields = ('total_cost', 'created_at')
+
+
+@admin.register(VendorClickLog)
+class VendorClickLogAdmin(admin.ModelAdmin):
+    list_display = ('vendor', 'timestamp')
+    list_filter = ('timestamp', 'vendor')
+
+@admin.register(MpesaTransaction)
+class MpesaTransactionAdmin(admin.ModelAdmin):
+    list_display = ('transaction_code', 'phone_number', 'amount', 'vendor', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('transaction_code', 'phone_number')
+
+@admin.register(VendorReview)
+class VendorReviewAdmin(admin.ModelAdmin):
+    list_display = ('vendor', 'author', 'rating', 'created_at')
+    list_filter = ('rating', 'vendor')
 
 
 admin.site.unregister(User)

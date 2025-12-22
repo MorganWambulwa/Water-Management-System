@@ -18,10 +18,16 @@
             <div class="card border-0 shadow-sm text-center p-4 h-100" style="border-radius: 15px;">
                 <div class="card-body">
                     <div class="mb-3">
+                        {% if vendor.image %}
+                        <img src="{{ vendor.image.url }}" alt="{{ vendor.business_name }}"
+                            class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
                         <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-4">
                             <i class="bi bi-shop fs-1 text-primary"></i>
                         </div>
+                        {% endif %}
                     </div>
+
                     <h3 class="fw-bold text-dark">{{ vendor.business_name }}</h3>
                     <p class="text-muted mb-4">{{ vendor.user.email }}</p>
 
@@ -29,13 +35,31 @@
                         <a href="{% url 'vendor_profile_edit' %}" class="btn btn-outline-primary rounded-pill">
                             <i class="bi bi-pencil me-2"></i> Edit Profile
                         </a>
+
+                        <a href="{% url 'vendor_report_issue' %}"
+                            class="btn btn-warning rounded-pill shadow-sm fw-bold text-dark">
+                            Request Repair
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 15px;">
+
+            <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 15px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">Customer Interest</h4>
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                        Last 7 Days: {{ total_clicks_7days }} Clicks
+                    </span>
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 15px;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="fw-bold mb-0">Business Overview</h4>
@@ -65,27 +89,65 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="col-12">
-                            <div class="p-3 bg-light rounded-3">
-                                <small class="text-muted d-block fw-bold text-uppercase">WhatsApp Link Preview</small>
-                                <p class="text-muted small mb-0 mt-1">
-                                    <i class="bi bi-link-45deg me-1"></i>
-                                    <code>https://wa.me/{{ vendor.whatsapp_number }}</code>
-                                </p>
-                            </div>
-                        </div>
                     </div>
 
                     <hr class="my-4">
 
                     <div class="alert alert-info border-0 bg-info bg-opacity-10">
                         <i class="bi bi-info-circle-fill me-2"></i>
-                        <strong>Note:</strong> Orders are currently received directly on your WhatsApp. Make sure your
-                        phone is on!
+                        <strong>Note:</strong> Orders are received directly on your WhatsApp. Keep your phone on!
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+{{ chart_labels|json_script:"chart-labels-data" }}
+{{ chart_data|json_script:"chart-values-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const labels = JSON.parse(document.getElementById('chart-labels-data').textContent);
+        const data = JSON.parse(document.getElementById('chart-values-data').textContent);
+
+        const ctx = document.getElementById('analyticsChart');
+
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Clicks on "Order Now"',
+                        data: data,
+                        backgroundColor: 'rgba(13, 202, 240, 0.6)',
+                        borderColor: 'rgba(13, 202, 240, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        barThickness: 30,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

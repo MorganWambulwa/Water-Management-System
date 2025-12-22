@@ -1,0 +1,46 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container" style="padding-top: 120px; padding-bottom: 80px;">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow border-0 text-center" style="border-radius: 15px; overflow: hidden;">
+                
+                <div class="card-header text-white py-3" style="background-color: #43B02A;">
+                    <h4 class="mb-0 fw-bold">Pay {{ vendor.business_name }}</h4>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" 
+                             alt="M-Pesa" style="width: 100px;">
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-bold small text-muted">Amount to Pay (KES)</label>
+                            <input type="number" name="amount" class="form-control form-control-lg fw-bold text-dark" 
+                                   placeholder="0" min="1" required>
+                            <small class="text-muted">Enter the amount you wish to pay.</small>
+                        </div>
+
+                        <div class="mb-4 text-start">
+                            <label class="form-label fw-bold small text-muted">M-Pesa Phone Number</label>
+                            <input type="text" name="phone" class="form-control form-control-lg" 
+                                   placeholder="07xxxxxxxx" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn text-white fw-bold py-3 rounded-pill shadow-sm" style="background-color: #43B02A; font-size: 1.1rem;">
+                                Pay Now <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

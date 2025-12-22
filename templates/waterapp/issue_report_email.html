@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .email-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .brand-strip {
+            background-color: #054bfb; /* Blue strip from your contact email */
+            height: 6px;
+            width: 100%;
+        }
+
+        .content-padding {
+            padding: 30px;
+        }
+
+        .data-row {
+            margin-bottom: 8px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 5px;
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        a { color: #054bfb; text-decoration: none; font-weight: 500; }
+        a:hover { text-decoration: underline; }
+        
+        .message-content {
+            margin-top: 25px;
+            margin-bottom: 30px;
+            white-space: pre-line; 
+            color: #222;
+        }
+
+        .description-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc3545; /* Red accent for urgency */
+            padding: 15px;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .signature {
+            margin-top: 40px;
+            color: #777;
+            font-size: 13px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            display: inline-block;
+        }
+        
+        .btn-action {
+            display: inline-block;
+            background-color: #054bfb;
+            color: #ffffff !important;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-wrapper">
+        <div class="brand-strip"></div>
+        
+        <div class="content-padding">
+            
+            <h3 style="margin-top: 0; color: #DC3545;"> URGENT: Maintenance Alert!</h3>
+            <p style="margin-bottom: 20px;">A new issue has been reported and requires attention.</p>
+
+            <div class="data-row">
+                <span class="label">Location:</span> {{ source_name }} <span style="color:#777">({{ source_type }})</span>
+            </div>
+
+            <div class="data-row">
+                <span class="label">Priority:</span> <strong style="color: #000000;">{{ priority }}</strong>
+            </div>
+
+            <div class="data-row">
+                <span class="label">Reporter:</span> {{ reporter_name }}
+            </div>
+
+            <div class="data-row">
+                <span class="label">Time:</span> {{ report_time }}
+            </div>
+
+            <div class="message-content">
+                <strong>Description:</strong>
+                <div class="description-box">
+                    {{ description }}
+                </div>
+            </div>
+
+            <a href="{{ dashboard_url }}" class="btn-action">View Dashboard to Resolve</a>
+
+            <div class="signature">
+                <div class="logo-text">
+                    <span style="color: #054bfb;">💧</span> WaterConnect
+                </div>
+                <br>
+                <a href="https://water-management-system-ouep.onrender.com">www.waterconnect.org</a>
+
+                <div class="footer-address">
+                    &copy; 2025 WaterConnect | Nairobi, Kenya
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

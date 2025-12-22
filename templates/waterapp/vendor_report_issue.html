@@ -1,0 +1,36 @@
+{% extends 'waterapp/base.html' %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-warning text-dark p-4">
+                    <h4 class="mb-0 fw-bold">Request Technician</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Describe the Issue</label>
+                            {{ form.description }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Urgency Level</label>
+                            {{ form.priority_level }}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-dark btn-lg rounded-pill">
+                                Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

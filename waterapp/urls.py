@@ -1,13 +1,15 @@
 from django.urls import path
 from . import views
-from . import mpesa_views
 
 urlpatterns = [
     path('', views.index, name='index'),
     path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
+    path('legal/<str:page_type>/', views.legal_page, name='legal_page'),
     
     path('accounts/signup/', views.signup, name='signup'),
     path('accounts/profile/', views.profile, name='profile'),
+
     path('map/', views.water_source_map, name='water_source_map'),
     path('api/map-data/', views.water_source_map_data, name='water_source_map_data'),
 
@@ -20,13 +22,17 @@ urlpatterns = [
     path('report/new/', views.issue_report_create, name='issue_report_create'),
     path('repair/log/<int:source_pk>/', views.repair_log_create, name='repair_log_create'),
     path('issue/resolve/<int:pk>/', views.issue_toggle_resolve, name='issue_toggle_resolve'),
+    path('admin/export/issues/', views.export_issues_csv, name='export_issues_csv'),
     
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('legal/<str:page_type>/', views.legal_page, name='legal_page'),
-    path('contact/', views.contact, name='contact'),
-    path('admin/export/issues/', views.export_issues_csv, name='export_issues_csv'),
-    path('donate/', mpesa_views.mpesa_pay, name='mpesa_pay'),
     path('vendors/', views.vendor_list, name='vendor_list'),
     path('partner/', views.vendor_signup, name='vendor_signup'),
     path('vendor/edit/', views.vendor_profile_edit, name='vendor_profile_edit'),
+    path('vendor/<int:pk>/', views.vendor_public_profile, name='vendor_public_profile'),
+    path('api/track-click/<int:vendor_id>/', views.track_vendor_click, name='track_vendor_click'),
+
+    path('donate/', views.donate, name='donate'),
+    path('pay/<int:vendor_id>/', views.initiate_payment, name='initiate_payment'),
+    path('my-transactions/', views.transaction_history, name='transaction_history'),
+    path('vendor/report-issue/', views.vendor_report_issue, name='vendor_report_issue'),
 ]

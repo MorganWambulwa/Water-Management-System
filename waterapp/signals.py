@@ -7,8 +7,10 @@ def update_source_status(sender, instance, created, **kwargs):
     """
     If a High Priority (Level 3) issue is created, 
     automatically set the WaterSource status to Maintenance.
+    
+    Updated to handle Vendor Issues (where water_source is None).
     """
-    if created and instance.priority_level == 3:
+    if created and instance.priority_level == 3 and instance.water_source:
         source = instance.water_source
         source.status = 'M'
         source.save()

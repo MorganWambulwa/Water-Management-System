@@ -9,7 +9,11 @@ from django.conf import settings
 import csv 
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from .models import WaterSource, IssueReport, RepairLog, WaterVendor
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.models import User
+from .models import WaterSource, IssueReport, RepairLog, WaterVendor, VendorClickLog, VendorReview, MpesaTransaction
+from .mpesa_views import trigger_stk_push
 from .forms import (
     IssueReportForm, 
     WaterSourceForm, 
@@ -18,9 +22,51 @@ from .forms import (
     ProfileUpdateForm, 
     VerificationRequestForm, 
     ContactForm, 
-    VendorSignUpForm,
-    VendorProfileEditForm
+    VendorSignUpForm, 
+    VendorProfileEditForm, 
+    VendorReviewForm,
+    VendorIssueReportForm
 )
+
+def notify_maintenance_team(request, report, source_name, source_type):
+    """
+    Sends a beautiful HTML email alert to ALL Admins and Technicians.
+    Includes a direct link to the dashboard for quick response.
+    """
+    staff_members = User.objects.filter(is_staff=True).exclude(email='')
+    recipient_emails = [user.email for user in staff_members]
+
+    if not recipient_emails:
+        print("No staff emails found to notify.")
+        return
+
+    context = {
+        'source_name': source_name,
+        'source_type': source_type,
+        'priority': report.get_priority_level_display(),
+        'reporter_name': report.reporter.username,
+        'report_time': timezone.now().strftime('%Y-%m-%d %H:%M'),
+        'description': report.description,
+        'dashboard_url': request.build_absolute_uri('/dashboard/')
+    }
+
+    html_message = render_to_string('waterapp/issue_report_email.html', context)
+    plain_message = strip_tags(html_message)
+
+    subject = f" ACTION REQUIRED: {source_type} Issue at {source_name}"
+
+    try:
+        send_mail(
+            subject,
+            plain_message, 
+            settings.EMAIL_HOST_USER,
+            recipient_emails,
+            html_message=html_message,
+            fail_silently=True
+        )
+        print(f"HTML Alert sent to {len(recipient_emails)} staff members.")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 def index(request):
     """Landing page: Renders the public dashboard and Vendor list."""
@@ -29,7 +75,7 @@ def index(request):
     operational_sources = WaterSource.objects.filter(status='O').count()
     live_status_sources = WaterSource.objects.all().order_by('-last_updated')[:5]
 
-    vendors = WaterVendor.objects.filter(is_open=True, is_verified=True)[:6]
+    vendors = WaterVendor.objects.filter(is_verified=True)[:6]
 
     context = {
         'total_sources': total_sources,
@@ -76,7 +122,7 @@ def water_source_map(request):
     return render(request, 'waterapp/water_source_map.html')
 
 def water_source_map_data(request):
-    """JSON API endpoint for the map. Now includes Vendors."""
+    """JSON API endpoint for the map. Tags items for filtering."""
     sources = WaterSource.objects.all()
     
     vendors = WaterVendor.objects.filter(
@@ -85,14 +131,13 @@ def water_source_map_data(request):
     ).exclude(latitude__isnull=True).exclude(longitude__isnull=True)
     
     data = []
-
     for s in sources:
         data.append({
             'type': 'source', 
-            'id': s.pk, 
-            'name': s.name, 
+            'id': s.pk,
+            'name': s.name,
             'lat': float(s.latitude),
-            'lon': float(s.longitude), 
+            'lon': float(s.longitude),
             'status': s.get_status_display(),
             'color': s.status_color
         })
@@ -101,12 +146,12 @@ def water_source_map_data(request):
         data.append({
             'type': 'vendor',
             'id': v.pk,
-            'name': f"{v.business_name} (Water Vendor)",
+            'name': v.business_name,
             'lat': float(v.latitude),
             'lon': float(v.longitude),
             'status': f"Selling @ KES {v.price_per_20l}/20L",
-            'phone': v.whatsapp_number, 
-            'color': 'info' 
+            'phone': v.whatsapp_number,
+            'color': 'info'
         })
         
     return JsonResponse(data, safe=False)
@@ -143,13 +188,21 @@ def water_source_detail(request, pk):
 
 @login_required 
 def issue_report_create(request):
-    """Allows a resident to submit a new issue report."""
+    """Allows a resident to submit a new issue report and notifies technicians."""
     if request.method == 'POST':
         form = IssueReportForm(request.POST)
         if form.is_valid():
             report = form.save(commit=False)
             report.reporter = request.user 
             report.save()
+            notify_maintenance_team(
+                request, 
+                report, 
+                report.water_source.name, 
+                "Public Source"
+            )
+
+            messages.success(request, "Report submitted! Technicians have been notified.")
             return redirect('index')
     else:
         form = IssueReportForm()
@@ -180,8 +233,27 @@ def dashboard(request):
     
     elif hasattr(request.user, 'vendor_profile'):
         vendor = request.user.vendor_profile
+        
+        today = timezone.now().date()
+        dates = [today - timedelta(days=i) for i in range(6, -1, -1)]
+        
+        chart_labels = []
+        chart_data = []
+        
+        for d in dates:
+            chart_labels.append(d.strftime('%a')) 
+            
+            count = VendorClickLog.objects.filter(
+                vendor=vendor,
+                timestamp__date=d
+            ).count()
+            chart_data.append(count)
+
         context = {
             'vendor': vendor,
+            'chart_labels': chart_labels,
+            'chart_data': chart_data,
+            'total_clicks_7days': sum(chart_data),
         }
         return render(request, 'waterapp/vendor_dashboard.html', context)
 
@@ -231,6 +303,37 @@ def vendor_profile_edit(request):
         form = VendorProfileEditForm(instance=vendor)
     
     return render(request, 'waterapp/vendor_profile_edit.html', {'form': form})
+
+@login_required
+def vendor_report_issue(request):
+    """Allows a Vendor to report a maintenance issue at their shop."""
+    if not hasattr(request.user, 'vendor_profile'):
+        messages.error(request, "Only registered vendors can request repairs.")
+        return redirect('index')
+
+    vendor = request.user.vendor_profile
+
+    if request.method == 'POST':
+        form = VendorIssueReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.vendor = vendor 
+            report.reporter = request.user
+            report.save()
+            
+            notify_maintenance_team(
+                request, 
+                report, 
+                vendor.business_name, 
+                "Commercial Vendor"
+            )
+
+            messages.success(request, "Repair request submitted! Technicians have been notified.")
+            return redirect('dashboard')
+    else:
+        form = VendorIssueReportForm()
+    
+    return render(request, 'waterapp/vendor_report_issue.html', {'form': form})
 
 @login_required
 def water_source_create_update(request, pk=None):
@@ -400,6 +503,7 @@ def contact(request):
                     html_message=html_message,
                     fail_silently=False,
                 )
+
                 messages.success(request, "Your message has been sent.")
                 return redirect('contact')
             except Exception as e:
@@ -412,72 +516,199 @@ def contact(request):
 def legal_page(request, page_type):
     """Renders the Privacy, Terms, and Cookie policies with detailed content."""
     
+    h_style = "fw-bold text-dark mt-4 mb-3"
+    p_style = "text-muted mb-3"
+    ul_style = "text-muted mb-4"
+
     content = {
         'privacy': {
             'title': 'Privacy Policy',
-            'updated': 'Last Updated: December 2025',
-            'body': """
-                <p>At WaterConnect, we are committed to protecting your personal information and your right to privacy. This policy explains what information we collect and how we use it.</p>
+            'updated': 'Last Updated: December 22, 2025',
+            'body': f"""
+                <p class="{p_style}">At WaterConnect, we prioritize the protection of your personal data. This policy outlines how we handle your information, particularly regarding our Water Vendor and M-Pesa payment services.</p>
                 
-                <h5 class="mt-4 fw-bold">1. Information We Collect</h5>
-                <p>We collect personal information that you voluntarily provide to us when you register on the website, express an interest in obtaining information about us or our products and services or otherwise when you contact us.</p>
-                <ul>
-                    <li><strong>Personal Data:</strong> Username, email address and phone number (if provided).</li>
-                    <li><strong>Usage Data:</strong> Information about how you interact with our platform, such as the water sources you view or report.</li>
-                    <li><strong>Location Data:</strong> When you use our map features, we may request access to your location to show nearby water sources.</li>
+                <h4 class="{h_style}">1. Information We Collect</h4>
+                <ul class="{ul_style}">
+                    <li><strong>Account Data:</strong> Username, email address and phone number.</li>
+                    <li><strong>Transaction Data:</strong> M-Pesa transaction codes, amounts and timestamps.</li>
+                    <li><strong>Location Data:</strong> GPS coordinates for water delivery and mapping services.</li>
                 </ul>
 
-                <h5 class="mt-4 fw-bold">2. How We Use Your Information</h5>
-                <p>We use the information we collect or receive:</p>
-                <ul>
-                    <li>To facilitate account creation and logon processes.</li>
-                    <li>To send administrative information to you (e.g., updates on reported issues).</li>
-                    <li>To protect our Services (e.g., fraud monitoring and prevention).</li>
+                <h4 class="{h_style}">2. How We Share Data with Vendors</h4>
+                <p class="{p_style}">WaterConnect acts as a bridge between you and independent Water Vendors. When you place an order:</p>
+                <ul class="{ul_style}">
+                    <li><strong>Phone Number:</strong> Your phone number is shared with the specific vendor you selected to facilitate delivery.</li>
+                    <li><strong>Location:</strong> Your delivery location is shared with the vendor for logistics purposes.</li>
                 </ul>
+                <p class="{p_style}">We do not sell your personal data to third-party advertisers.</p>
 
-                <h5 class="mt-4 fw-bold">3. Sharing Your Information</h5>
-                <p>We do not share, sell, rent or trade your information with third parties for their promotional purposes. We may share data with local water authorities solely for the purpose of resolving maintenance issues you have reported.</p>
+                <h4 class="{h_style}">3. M-Pesa Payment Data</h4>
+                <p class="{p_style}">Payments are processed securely via Safaricom's Daraja API. We store transaction records for account history and dispute resolution purposes only.</p>
             """
         },
         'terms': {
             'title': 'Terms of Service',
-            'updated': 'Last Updated: December 2025',
-            'body': """
-                <p>Welcome to WaterConnect. By accessing our website, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use our platform.</p>
+            'updated': 'Last Updated: December 22, 2025',
+            'body': f"""
+                <p class="{p_style}">Welcome to WaterConnect. By using our platform to locate water sources or order refills, you agree to these terms.</p>
 
-                <h5 class="mt-4 fw-bold">1. Use of the Platform</h5>
-                <p>You agree to use WaterConnect only for lawful purposes. You are prohibited from:</p>
-                <ul>
-                    <li>Submitting false or misleading reports about water sources.</li>
-                    <li>Attempting to interfere with the proper working of the site (e.g., hacking or spamming).</li>
-                    <li>Using the contact information of technicians for harassment or non-official purposes.</li>
+                <h4 class="{h_style}">1. Platform Role & Liability</h4>
+                <p class="{p_style}">WaterConnect is a technology platform that connects users with independent Water Vendors. We are <strong>not</strong> the seller of the water.</p>
+                <ul class="{ul_style}">
+                    <li><strong>Quality:</strong> While we verify vendors, we are not liable for the quality or safety of the water delivered by independent vendors.</li>
+                    <li><strong>Delivery:</strong> Delivery times and fulfillment are the responsibility of the vendor.</li>
                 </ul>
 
-                <h5 class="mt-4 fw-bold">2. User Accounts</h5>
-                <p>You are responsible for maintaining the confidentiality of your account and password. You agree to accept responsibility for all activities that occur under your account.</p>
+                <h4 class="{h_style}">2. M-Pesa Payments & Refunds</h4>
+                <p class="{p_style}">All payments made via M-Pesa on WaterConnect are directed to the platform or the vendor as specified.</p>
+                <ul class="{ul_style}">
+                    <li><strong>Disputes:</strong> If a vendor fails to deliver after payment, please report the issue via your Dashboard within 24 hours.</li>
+                    <li><strong>Refunds:</strong> Refunds are processed at the discretion of the admin after verifying the claim with the vendor. Reversals are subject to M-Pesa transaction fees.</li>
+                </ul>
+
+                <h4 class="{h_style}">3. User Conduct</h4>
+                <p class="{p_style}">You agree not to submit false reports, harass vendors or attempt to bypass the platform's payment system for orders initiated here.</p>
             """
         },
         'cookies': {
             'title': 'Cookie Policy',
-            'updated': 'Last Updated: December 2025',
-            'body': """
-                <p>This Cookie Policy explains how WaterConnect uses cookies and similar technologies to recognize you when you visit our website.</p>
+            'updated': 'Last Updated: December 22, 2025',
+            'body': f"""
+                <p class="{p_style}">We use cookies to improve your experience on WaterConnect.</p>
 
-                <h5 class="mt-4 fw-bold">1. What are Cookies?</h5>
-                <p>Cookies are small data files that are placed on your computer or mobile device when you visit a website. They are widely used to make websites work more efficiently and to provide reporting information.</p>
+                <h4 class="{h_style}">1. Essential Cookies</h4>
+                <p class="{p_style}">These are required for you to log in, view your dashboard and process M-Pesa payments securely.</p>
 
-                <h5 class="mt-4 fw-bold">2. How We Use Cookies</h5>
-                <ul>
-                    <li><strong>Essential Cookies:</strong> These are strictly necessary for the website to function (e.g., allowing you to log in and access secure areas).</li>
-                    <li><strong>Functionality Cookies:</strong> These are used to recognize you when you return to our website, enabling us to personalize content for you.</li>
-                    <li><strong>Analytics Cookies:</strong> We use these to collect information about how visitors use our website, helping us improve the user experience.</li>
-                </ul>
-
-                <h5 class="mt-4 fw-bold">3. Managing Cookies</h5>
-                <p>You have the right to decide whether to accept or reject cookies. You can set or amend your web browser controls to accept or refuse cookies. If you choose to reject cookies, you may still use our website, though your access to some functionality may be restricted.</p>
+                <h4 class="{h_style}">2. Analytics</h4>
+                <p class="{p_style}">We use anonymous cookies to understand how many users are viewing the map and vendor profiles to improve our services.</p>
             """
         }
     }
     
     data = content.get(page_type)
+    if not data:
+        data = content['privacy']
+        
     return render(request, 'waterapp/legal_page.html', {'data': data})
+
+def track_vendor_click(request, vendor_id):
+    """API to record a click on the Order button."""
+    vendor = get_object_or_404(WaterVendor, pk=vendor_id)
+    VendorClickLog.objects.create(vendor=vendor)
+    return JsonResponse({'status': 'success'})
+
+def vendor_public_profile(request, pk):
+    """Public profile for a vendor: shows details and reviews."""
+    vendor = get_object_or_404(WaterVendor, pk=pk)
+    reviews = vendor.reviews.all()
+    
+    average_rating = 0
+    if reviews.exists():
+        total_stars = sum([r.rating for r in reviews])
+        average_rating = round(total_stars / reviews.count(), 1)
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        form = VendorReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.vendor = vendor
+            review.author = request.user
+            review.save()
+            messages.success(request, "Your review has been posted!")
+            return redirect('vendor_public_profile', pk=pk)
+    else:
+        form = VendorReviewForm()
+
+    context = {
+        'vendor': vendor,
+        'reviews': reviews,
+        'average_rating': average_rating,
+        'form': form,
+        'star_range': range(1, 6),
+    }
+    return render(request, 'waterapp/vendor_public_profile.html', context)
+
+
+@login_required
+def initiate_payment(request, vendor_id):
+    """
+    1. Gets Phone + Amount from User.
+    2. Triggers REAL M-Pesa STK Push (Popup).
+    """
+    vendor = get_object_or_404(WaterVendor, pk=vendor_id)
+    
+    if request.method == "POST":
+        phone = request.POST.get('phone')
+        custom_amount = request.POST.get('amount') 
+        
+        response = trigger_stk_push(
+            phone_number=phone,
+            amount=custom_amount,
+            account_reference=f"Pay {vendor.business_name}",
+            transaction_desc="Water Payment"
+        )
+        
+        if response and response.response_code == "0":
+            MpesaTransaction.objects.create(
+                phone_number=phone,
+                amount=custom_amount,
+                vendor=vendor,
+                status="Pending (STK Sent)",
+                transaction_code=response.checkout_request_id
+            )
+            messages.success(request, f"STK Push sent to {phone}. Please enter your PIN!")
+        else:
+            error_msg = response.error_message if response else "Connection Failed"
+            messages.error(request, f"M-Pesa Error: {error_msg}")
+            
+        return redirect('vendor_public_profile', pk=vendor_id)
+    
+    initial_phone = request.user.username if request.user.username.isdigit() else ""
+    
+    return render(request, 'waterapp/payment_form.html', {
+        'vendor': vendor, 
+        'user': request.user
+    })
+
+
+def donate(request):
+    """Donation (Any Amount) using Django-Daraja."""
+    if request.method == 'POST':
+        phone = request.POST.get('phone')
+        amount = request.POST.get('amount')
+        
+        response = trigger_stk_push(
+            phone_number=phone,
+            amount=amount,
+            account_reference="Donation",
+            transaction_desc="Community Support"
+        )
+        
+        if response and response.response_code == "0":
+            MpesaTransaction.objects.create(
+                phone_number=phone,
+                amount=amount,
+                status="Pending (STK Sent)",
+                transaction_code=response.checkout_request_id
+            )
+            messages.success(request, f"Thank you! STK Push sent to {phone}.")
+        else:
+            error_msg = response.error_message if response else "Connection Failed"
+            messages.error(request, f"Failed: {error_msg}")
+            
+        return redirect('index')
+
+    return render(request, 'waterapp/donate.html')
+
+@login_required
+def transaction_history(request):
+    """Displays a list of M-Pesa payments made by the logged-in user."""
+    user_phone = request.user.username
+    
+    transactions = MpesaTransaction.objects.filter(
+        phone_number=user_phone
+    ).order_by('-created_at')
+
+    return render(request, 'waterapp/transaction_history.html', {
+        'transactions': transactions
+    })

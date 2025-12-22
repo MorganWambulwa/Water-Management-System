@@ -1,4 +1,5 @@
 {% extends 'waterapp/base.html' %}
+{% load static %}
 
 {% block content %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -6,34 +7,81 @@
 <style>
     #map { height: calc(100vh - 76px); width: 100%; margin-top: 76px; }
     
-    .leaflet-popup-content-wrapper { border-radius: 10px; }
-    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color: white; font-weight: bold; }
+    .leaflet-popup-content-wrapper { border-radius: 12px; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; color: white; font-weight: bold; }
     
     .map-legend {
         position: absolute;
-        top: 90px;
+        bottom: 30px;
         right: 10px;
         z-index: 1000;
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         font-size: 0.85rem;
+        backdrop-filter: blur(5px);
+    }
+
+    .filter-container {
+        position: absolute;
+        top: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background: white;
+        padding: 5px;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        gap: 5px;
+    }
+    
+    .filter-btn {
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .filter-btn.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .filter-btn:not(.active) {
+        background-color: transparent;
+        color: #6c757d;
+    }
+    
+    .filter-btn:hover:not(.active) {
+        background-color: #f8f9fa;
+        color: #000;
     }
 </style>
+
+<div class="filter-container">
+    <button class="filter-btn active" onclick="filterMarkers('all')">All</button>
+    <button class="filter-btn" onclick="filterMarkers('source')">Public Sources</button>
+    <button class="filter-btn" onclick="filterMarkers('vendor')">Refill Stations</button>
+</div>
 
 <div id="map"></div>
 
 <div class="map-legend">
-    <div class="mb-1"><span style="color:green">●</span> Operational Source</div>
-    <div class="mb-1"><span style="color:red">●</span> Broken Source</div>
-    <div><span style="color:#0dcaf0">●</span> Water Vendor (Order)</div>
+    <div class="mb-2 fw-bold text-muted text-uppercase small">Legend</div>
+    <div class="mb-1 d-flex align-items-center"><span style="color:green; font-size: 1.2rem; margin-right: 8px;">●</span> Operational Source</div>
+    <div class="mb-1 d-flex align-items-center"><span style="color:red; font-size: 1.2rem; margin-right: 8px;">●</span> Broken Source</div>
+    <div class="d-flex align-items-center"><span style="color:#0dcaf0; font-size: 1.2rem; margin-right: 8px;">●</span> Water Vendor</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
     var map = L.map('map').setView([-1.2921, 36.8219], 13);
+    var markers = []; 
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -54,39 +102,68 @@
                     color: color,
                     fillColor: color,
                     fillOpacity: 0.8,
-                    radius: 10
-                }).addTo(map);
+                    radius: 10,
+                    type: point.type 
+                });
 
                 var popupHtml = '';
 
                 if (point.type === 'vendor') {
                     popupHtml = `
-                        <div class="text-center">
+                        <div class="text-center p-2">
                             <h6 class="fw-bold mb-1">${point.name}</h6>
-                            <span class="badge bg-info text-dark mb-2">Water Vendor</span>
+                            <span class="badge bg-info text-dark mb-2 rounded-pill">Water Vendor</span>
                             <p class="small text-muted mb-2">${point.status}</p>
                             
-                            <a href="https://api.whatsapp.com/send?phone=${point.phone}&text=Hello, I saw you on the WaterConnect Map and want to place an order.%0a%0a📍 Location: %0a📦 Quantity: " 
+                            <a href="https://api.whatsapp.com/send?phone=${point.phone}&text=Hello, I saw you on the WaterConnect Map and want to place an order." 
                                target="_blank" 
-                               class="btn btn-sm btn-info text-white fw-bold w-100">
-                               <i class="bi bi-whatsapp"></i> Order Now
+                               onclick="trackClick(${point.id})" 
+                               class="btn btn-sm btn-info text-white fw-bold w-100 rounded-pill shadow-sm">
+                               <i class="bi bi-whatsapp me-1"></i> Order Now
                             </a>
                         </div>
                     `;
                 } else {
                     popupHtml = `
-                        <div class="text-center">
+                        <div class="text-center p-2">
                             <h6 class="fw-bold mb-1">${point.name}</h6>
-                            <span class="status-badge" style="background-color: ${color}">${point.status}</span>
-                            <hr class="my-2">
-                            <a href="/sources/${point.id}/" class="btn btn-sm btn-outline-primary">View Details</a>
+                            <span class="status-badge mb-2" style="background-color: ${color}">${point.status}</span>
+                            <hr class="my-2 opacity-25">
+                            <a href="/sources/${point.id}/" class="btn btn-sm btn-outline-primary w-100 rounded-pill">View Details</a>
                         </div>
                     `;
                 }
 
                 marker.bindPopup(popupHtml);
+                marker.addTo(map);
+                
+                markers.push(marker);
             });
         })
         .catch(error => console.error('Error loading map data:', error));
+
+    function filterMarkers(type) {
+        const buttons = document.querySelectorAll('.filter-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        markers.forEach(marker => {
+            if (type === 'all' || marker.options.type === type) {
+                if (!map.hasLayer(marker)) {
+                    map.addLayer(marker);
+                }
+            } else {
+                if (map.hasLayer(marker)) {
+                    map.removeLayer(marker);
+                }
+            }
+        });
+    }
+
+    function trackClick(vendorId) {
+        fetch(`/api/track-click/${vendorId}/`)
+            .then(response => console.log("Click tracked for vendor " + vendorId))
+            .catch(error => console.error("Tracking error:", error));
+    }
 </script>
 {% endblock %}

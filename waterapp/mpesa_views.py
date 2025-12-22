@@ -1,43 +1,43 @@
-from django.shortcuts import render, redirect
-from django.contrib import messages
 from django_daraja.mpesa.core import MpesaClient # type: ignore
-from django.contrib.auth.decorators import login_required
+import logging
+logger = logging.getLogger(__name__)
 
-@login_required
-def mpesa_pay(request):
-    """View to initiate M-Pesa STK Push."""
-    if request.method == 'POST':
-        phone_number = request.POST.get('phone')
-        amount = request.POST.get('amount')
+def trigger_stk_push(phone_number, amount, account_reference="WaterConnect", transaction_desc="Payment"):
+    """
+    A reusable helper function that communicates with Safaricom.
+    It handles phone formatting and the STK Push request.
+    
+    Args:
+        phone_number (str): The user's phone (e.g., "0712...")
+        amount (int/str): The amount to pay
+        account_reference (str): Text that appears on the user's statement
+        transaction_desc (str): Internal description
         
-        # 1. Format Phone Number (Must start with 254)
-        if phone_number.startswith('0'):
-            phone_number = '254' + phone_number[1:]
-        elif phone_number.startswith('+254'):
-            phone_number = phone_number[1:]
+    Returns:
+        Response object from MpesaClient or None if failed.
+    """
+    
+    phone_number = str(phone_number).strip()
+    if phone_number.startswith('0'):
+        phone_number = '254' + phone_number[1:]
+    elif phone_number.startswith('+254'):
+        phone_number = phone_number[1:]
         
-        # 2. Initialize Client
-        cl = MpesaClient()
+    cl = MpesaClient()
+    
+    callback_url = 'https://water-management-system-ouep.onrender.com/api/mpesa/callback/'
+    
+    try:
+        response = cl.stk_push(
+            phone_number, 
+            int(amount), 
+            account_reference, 
+            transaction_desc, 
+            callback_url
+        )
+        return response
         
-        # 3. Callback URL (For demo, we use a placeholder or your render link)
-        callback_url = 'https://water-management-system-ouep.onrender.com/api/mpesa/callback/'
-        
-        account_reference = 'WaterConnect'
-        transaction_desc = 'Donation'
-        
-        try:
-            # 4. Trigger the STK Push
-            response = cl.stk_push(phone_number, int(amount), account_reference, transaction_desc, callback_url)
-            
-            # 5. Success Message
-            if response.response_code == "0":
-                messages.success(request, f"STK Push sent to {phone_number}. Check your phone to pay!")
-            else:
-                messages.error(request, f"Failed: {response.error_message}")
-                
-        except Exception as e:
-            messages.error(request, f"M-Pesa Error: {str(e)}")
-            
-        return redirect('mpesa_pay')
-
-    return render(request, 'waterapp/pay.html')
+    except Exception as e:
+        logger.error(f"M-Pesa STK Push Failed: {str(e)}")
+        print(f"M-Pesa Error: {str(e)}")
+        return None

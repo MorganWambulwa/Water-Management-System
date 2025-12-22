@@ -26,9 +26,8 @@
 
             <div class="d-flex align-items-center gap-2 ms-auto order-lg-last">
 
-                <a href="{% url 'mpesa_pay' %}" class="btn btn-sm rounded-pill text-white fw-bold px-3"
-                    style="background-color: #43B02A; border: none;">
-                    <span class="d-none d-sm-inline">Donate</span> <i class="bi bi-coin"></i>
+                <a href="{% url 'donate' %}" class="btn btn-success rounded-pill px-4 ms-2 d-none d-md-inline-block">
+                    Donate <i class="bi bi-currency-dollar"></i>
                 </a>
 
                 {% if user.is_authenticated %}
@@ -42,6 +41,7 @@
                         <li><a class="dropdown-item" href="/admin/" target="_blank">Admin Panel</a></li>
                         {% endif %}
                         <li><a class="dropdown-item" href="{% url 'profile' %}">My Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'transaction_history' %}">My Transactions</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -82,13 +82,13 @@
                         <a class="nav-link text-white px-3" href="{% url 'water_source_list' %}">Sources</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link text-white px-3" href="{% url 'vendor_list' %}">Order Water</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-white px-3" href="{% url 'dashboard' %}">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white px-3" href="{% url 'vendor_signup' %}">Partner with Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white px-3" href="{% url 'contact' %}">Contact</a>
                     </li>
                 </ul>
             </div>
