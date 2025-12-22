@@ -81,6 +81,7 @@ opentelemetry-sdk==1.37.0
 opentelemetry-semantic-conventions==0.58b0
 packaging==25.0
 pandas==2.3.3
+pillow==12.0.0
 proto-plus==1.26.1
 protobuf==6.32.1
 psycopg2-binary==2.9.11
@@ -97,6 +98,7 @@ python-decouple==3.8
 python-dotenv==1.1.1
 python-multipart==0.0.20
 pytz==2025.2
+pywin32==311
 PyYAML==6.0.3
 referencing==0.37.0
 requests==2.32.5
