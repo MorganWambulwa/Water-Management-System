@@ -6,43 +6,18 @@
         <div class="col-md-6">
             <div class="card shadow border-0">
                 <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">Log Repair for: {{ source.name }}</h5>@login_required
-def repair_log_create(request, source_pk):
-    source = get_object_or_404(WaterSource, pk=source_pk)
-    
-    if request.method == 'POST':
-        form = RepairLogForm(request.POST)
-        if form.is_valid():
-            log = form.save(commit=False)
-            
-            # 1. Link data to the source and technician
-            log.water_source = source
-            log.technician = request.user 
-            log.save()
-            
-            
-            # 2. Flip Status to OPERATIONAL
-            source.status = 'O'
-            source.save()
-            
-            # 3. Auto-Resolve ALL open issues for this source
-            open_issues = source.issues.filter(is_resolved=False)
-            resolved_count = open_issues.count()
-            open_issues.update(is_resolved=True)
-            
-            # 4. Success Message
-            messages.success(
-                request, 
-                f" Repair logged! Source marked 'Operational' and {resolved_count} issues auto-resolved."
-            )
-            
-            return redirect('water_source_detail', pk=source_pk)
-    else:
-        form = RepairLogForm(initial={'water_source': source})
-
-    return render(request, 'waterapp/repair_log_form.html', {'form': form, 'source': source})
+                    <h5 class="mb-0">Log Repair for: {{ source.name }}</h5>
                 </div>
+                
                 <div class="card-body">
+                    <div class="alert alert-info border-0 shadow-sm mb-3">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Submitting this log will automatically mark the source as 
+                            <strong>Operational</strong> and close all open reports.
+                        </small>
+                    </div>
+
                     <form method="post">
                         {% csrf_token %}
                         {{ form.as_p }}

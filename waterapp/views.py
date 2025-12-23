@@ -427,7 +427,7 @@ def repair_log_create(request, source_pk):
             
             messages.success(
                 request, 
-                f"✅ Repair logged! Source marked 'Operational' and {resolved_count} issues were automatically resolved."
+                f"Repair logged! Source marked 'Operational' and {resolved_count} issues were automatically resolved."
             )
             
             return redirect('water_source_detail', pk=source_pk)
