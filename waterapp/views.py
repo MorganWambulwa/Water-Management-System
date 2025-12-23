@@ -38,17 +38,18 @@ class EmailThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        try:
-            send_mail(
-                self.subject,
-                self.plain_message,
-                settings.EMAIL_HOST_USER,
-                self.recipient_emails,
-                html_message=self.html_message,
-                fail_silently=True
-            )
-        except Exception as e:
-            print(f"Failed to send email: {e}")
+            try:
+                send_mail(
+                    self.subject,
+                    self.plain_message,
+                    settings.EMAIL_HOST_USER,
+                    self.recipient_emails,
+                    html_message=self.html_message,
+                    fail_silently=False
+                )
+                print("Email sent successfully.")
+            except Exception as e:
+                print(f"EMAIL ERROR: {e}")
 
 def notify_maintenance_team(request, report, source_name, source_type):
     staff_members = User.objects.filter(is_staff=True).exclude(email='')
