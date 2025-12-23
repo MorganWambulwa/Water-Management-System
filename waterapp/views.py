@@ -66,7 +66,7 @@ def notify_maintenance_team(request, report, source_name, source_type):
         'source_type': source_type,
         'priority': report.get_priority_level_display(),
         'reporter_name': report.reporter.username,
-        'report_time': timezone.now().strftime('%Y-%m-%d %H:%M'),
+        'report_time': timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M'),
         'description': report.description,
         'dashboard_url': request.build_absolute_uri('/dashboard/')
     }
@@ -405,17 +405,30 @@ def request_verification(request, pk):
 
 @login_required
 def repair_log_create(request, source_pk):
+    """
+    Logs a repair, sets source to Operational, and auto-resolves all open issues.
+    """
     source = get_object_or_404(WaterSource, pk=source_pk)
+    
     if request.method == 'POST':
         form = RepairLogForm(request.POST)
         if form.is_valid():
             log = form.save(commit=False)
+
             log.water_source = source
             log.technician = request.user 
             log.save()
             
             source.status = 'O'
             source.save()
+            open_issues = source.issues.filter(is_resolved=False)
+            resolved_count = open_issues.count()
+            open_issues.update(is_resolved=True)
+            
+            messages.success(
+                request, 
+                f"✅ Repair logged! Source marked 'Operational' and {resolved_count} issues were automatically resolved."
+            )
             
             return redirect('water_source_detail', pk=source_pk)
     else:
