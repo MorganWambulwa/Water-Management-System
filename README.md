@@ -1,9 +1,9 @@
-WaterConnect - Smart Water Management System
+# WaterConnect - Smart Water Management System
 
-**WaterConnect** is a comprehensive web platform designed to bridge the gap between communities and water service providers. It empowers residents to locate safe water sources and report issues, while providing administrators with data-driven tools and funding mechanisms to maintain infrastructure.
+WaterConnect is a comprehensive web platform designed to bridge the gap between communities and water service providers. It empowers residents to locate safe water sources and report issues, while providing administrators with data-driven tools and funding mechanisms to maintain infrastructure.
 
 ## Live Demo
-**[View the Live Site on Render](https://water-management-system-ouep.onrender.com)**
+[View the Live Site on Render](https://water-management-system-ouep.onrender.com)
 
 ---
 
@@ -11,20 +11,20 @@ WaterConnect - Smart Water Management System
 
 ### Public & Community Features
 * **Interactive Map:** Visualizes all water sources with status indicators:
-    * 🟢 **Green:** Operational
-    * 🟡 **Yellow:** Maintenance
-    * 🔴 **Red:** Contaminated
-    * 🟤 **Brown:** Broken/Non-Operational
+    * Green: Operational
+    * Yellow: Maintenance
+    * Red: Contaminated
+    * Brown: Broken/Non-Operational
 * **Report Issues:** Residents can report broken pumps or leaks (requires login to prevent spam).
-* **M-Pesa Donations:** Integrated **Safaricom Daraja API** (STK Push) allows community members to donate funds directly for repairs.
+* **M-Pesa Donations:** Integrated Safaricom Daraja API (STK Push) allows community members to donate funds directly for repairs.
 * **User Dashboard:** A personalized hub where users track their reported issues, receive "Resolved" notifications, and see nearby working sources.
-* **Contact Support:** Professional HTML email form via Brevo SMTP for direct inquiries.
+* **Contact Support:** Integrated email notification system for technician alerts and support inquiries.
 
 ### Admin & Technician Features
 * **Analytics Dashboard:** Real-time charts showing network health and issue priority distribution.
 * **Verification System:** Only Admins can mark a source as "Verified" (adds a Blue Badge), ensuring data trust.
 * **Data Management:** Full CRUD (Create, Read, Update, Delete) for water sources.
-    * *Security Note:* Regular users can only delete sources *they* created.
+    * Security Note: Regular users can only delete sources they created.
 * **CSV Export:** Admins can download a report of all "Open Issues" for offline analysis.
 
 ---
@@ -34,13 +34,13 @@ WaterConnect - Smart Water Management System
 * **Frontend:** Bootstrap 5, HTML5, CSS3 (Custom Responsive Design)
 * **Database:** PostgreSQL (Production), SQLite (Local)
 * **Payments:** Django-Daraja (M-Pesa API)
-* **Email:** Brevo SMTP (Port 2525) with HTML Templates
+* **Email:** Gmail SMTP (Port 465 SSL) / Console Backend (Dev Mode)
 * **Mapping:** Leaflet.js
 * **Deployment:** Render Cloud Hosting
 
 ---
 
-## 💻 Local Installation Guide
+## Local Installation Guide
 
 ### 1. Clone the Repository
 ```bash
@@ -50,8 +50,10 @@ cd Water-Management-System
 Bash
 
 python -m venv venv
+
 # Windows
-source venv/Scripts/activate
+venv\Scripts\activate
+
 # Mac/Linux
 source venv/bin/activate
 3. Install Dependencies
@@ -59,20 +61,27 @@ Bash
 
 pip install -r requirements.txt
 4. Set Up Environment Variables
-Create a .env file in the root directory:
+Create a .env file in the root directory and add the following configuration:
 
-Code snippet
+Ini, TOML
 
-# Django Security
-SECRET_KEY=your_secret_key
+SECRET_KEY=your_secret_key_here
 DEBUG=True
 
+DATABASE_URL=postgres://user:password@localhost:5432/waterdb
+
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=465
+EMAIL_USE_SSL=True
+EMAIL_USE_TLS=False
 EMAIL_HOST_USER=your_email@gmail.com
-EMAIL_HOST_PASSWORD=your_app_password
+EMAIL_HOST_PASSWORD=your_app_password_here
 
 MPESA_ENVIRONMENT=sandbox
-MPESA_CONSUMER_KEY=your_key
-MPESA_CONSUMER_SECRET=your_secret
+MPESA_CONSUMER_KEY=your_consumer_key
+MPESA_CONSUMER_SECRET=your_consumer_secret
+MPESA_EXPRESS_SHORTCODE=174379
+MPESA_PASSKEY=bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919
 5. Run Migrations & Server
 Bash
 
@@ -80,4 +89,4 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
-Visit http://127.0.0.1:8000 to start.
+Visit http://127.0.0.1:8000 to start using the application.
