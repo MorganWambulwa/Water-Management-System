@@ -88,33 +88,27 @@ JAZZMIN_SETTINGS = {
     "copyright": "WaterApp © 2025",
     "search_model": "waterapp.WaterSource",
     "user_avatar": None,
-    
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
     "order_with_respect_to": ["waterapp", "auth"],
     "show_ui_builder": False,
     "show_version": False,
-    
     "custom_css": "waterapp/css/admin_custom.css",
 }
 
 JAZZMIN_UI_TWEAKS = {
     "theme": "default", 
     "dark_mode_theme": None,
-    
     "navbar_fixed": False,
     "sidebar_fixed": True,
     "footer_fixed": False,
-    
     "navbar": "navbar-white navbar-light", 
     "sidebar": "sidebar-dark-primary",
-    
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
     },
-    
     "actions_sticky": True,
 }
 
@@ -127,6 +121,9 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -141,6 +138,7 @@ EMAIL_TIMEOUT = 15
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
 if RENDER_EXTERNAL_HOSTNAME:
