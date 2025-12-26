@@ -50,7 +50,6 @@ class EmailThread(threading.Thread):
             print(f"[SUCCESS] Email sent successfully to: {self.recipient_emails}")
         except Exception as e:
             print(f"[EMAIL FAILURE] Could not send email: {e}")
-
 def notify_maintenance_team(request, report, source_name, source_type):
     staff_members = User.objects.filter(is_staff=True).exclude(email='')
     recipient_emails = [user.email for user in staff_members]
@@ -76,7 +75,18 @@ def notify_maintenance_team(request, report, source_name, source_type):
 
     subject = f"ACTION REQUIRED: {source_type} Issue at {source_name}"
 
-    EmailThread(subject, plain_message, recipient_emails, html_message).start()
+    try:
+        send_mail(
+            subject,
+            plain_message,
+            settings.EMAIL_HOST_USER,
+            recipient_emails,
+            html_message=html_message,
+            fail_silently=False
+        )
+        print(f"DEBUG: Email sent successfully to {recipient_emails}")
+    except Exception as e:
+        print(f"DEBUG CRITICAL FAILURE: {e}")
 
 def index(request):
     total_sources = WaterSource.objects.count()
